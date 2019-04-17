@@ -27,6 +27,12 @@ class Popup(QtWidgets.QMainWindow):
         self.pushButton.setText("Delete")
         self.pushButton.clicked.connect(self.tableWidget.delete_row)
 
+        self.pushButton2 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
+        self.pushButton2.setObjectName("pushButton")
+        self.pushButton2.setText("Opslaan")
+        self.pushButton2.clicked.connect(self.tableWidget.save)
+
 
 class Werkdag(Edit_table):
     def __init__(self, pushvar, tablename, columns, user, specifier=None):
@@ -61,51 +67,55 @@ class Ui_MainWindow(object):
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
 
-        self.tableWidget = Edit_table(self.tab, 'activiteiten', {
-                                      'activiteitnaam': 'editable', 'omschrijving': 'editable'}, self.inlogdata)
-        self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
-        self.tableWidget.setObjectName("tableWidget")
-
-        self.pushButton = QtWidgets.QPushButton(self.tab)
-        self.pushButton.setGeometry(QtCore.QRect(410, 20, 81, 23))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton.setText("Delete")
-        self.pushButton.clicked.connect(self.tableWidget.delete_row)
-
-        self.tabWidget.addTab(self.tab, "")
+        # uren registratie
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.tabWidget.addTab(self.tab_2, "")
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), "Uren registratie")
         self.tableWidget2 = Werkdag(self.tab_2, 'dag', {
             'datum': 'editable', 'thuisofkantoor': 'editable', 'starttijd': 'editable', 'eindtijd': 'editable', 'goedgekeurd': '0', 'medewerker_id': str(self.inlogdata['medewerker_id'])}, self.inlogdata, specifier="WHERE medewerker_id =" + str(self.inlogdata['medewerker_id']) + ";")
-        self.tableWidget2.setGeometry(QtCore.QRect(10, 10, 600, 300))
+        self.tableWidget2.setGeometry(QtCore.QRect(10, 10, 765, 300))
         self.tableWidget2.setObjectName("tableWidget2")
 
         self.pushButton2 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton2.setGeometry(QtCore.QRect(10, 411, 81, 23))
+        self.pushButton2.setGeometry(QtCore.QRect(10, 320, 81, 23))
         self.pushButton2.setObjectName("pushButton")
         self.pushButton2.setText("Delete")
         self.pushButton2.clicked.connect(self.tableWidget2.delete_row)
 
         self.pushButton3 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton3.setGeometry(QtCore.QRect(10, 320, 81, 23))
+        self.pushButton3.setGeometry(QtCore.QRect(101, 320, 81, 23))
         self.pushButton3.setObjectName("pushButton")
         self.pushButton3.setText("Opslaan")
         self.pushButton3.clicked.connect(self.tableWidget2.save)
+
+        # manager only functies
+        if self.inlogdata['manager_id'] is None:
+            # activiteiten aanpassen
+            self.tabWidget.addTab(self.tab, "")
+            self.tabWidget.setTabText(self.tabWidget.indexOf(
+                self.tab), "Activiteiten")
+            self.tableWidget = Edit_table(self.tab, 'activiteiten', {
+                                          'activiteitnaam': 'editable', 'omschrijving': 'editable'}, self.inlogdata)
+            self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
+            self.tableWidget.setObjectName("tableWidget")
+
+            self.pushButton = QtWidgets.QPushButton(self.tab)
+            self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
+            self.pushButton.setObjectName("pushButton")
+            self.pushButton.setText("Delete")
+            self.pushButton.clicked.connect(self.tableWidget.delete_row)
+
+            self.pushButton4 = QtWidgets.QPushButton(self.tab)
+            self.pushButton4.setGeometry(QtCore.QRect(101, 320, 81, 23))
+            self.pushButton4.setObjectName("pushButton")
+            self.pushButton4.setText("Opslaan")
+            self.pushButton4.clicked.connect(self.tableWidget.save)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(
-            self.tab), _translate("MainWindow", "Activiteiten"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2),
-                                  _translate("MainWindow", "Tab 2"))
