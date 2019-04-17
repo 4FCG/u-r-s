@@ -12,7 +12,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(222, 233)
+        MainWindow.setFixedSize(230, 230)
+        MainWindow.setWindowIcon(QtGui.QIcon('images\icon.png'))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
@@ -47,8 +48,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.pushButton.setText(_translate("MainWindow", "Log in"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "URS: Login"))
+        self.pushButton.setText(_translate("MainWindow", "Inloggen"))
         self.label.setText(_translate("MainWindow", "Voornaam"))
         self.label_2.setText(_translate("MainWindow", "Achternaam"))
         self.label_3.setText(_translate("MainWindow", "Wachtwoord"))

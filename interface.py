@@ -32,7 +32,7 @@ class Loginscherm(login.Ui_MainWindow):
             mainscreen = tabtest.Ui_MainWindow(loginresult)
             mainscreen.setupUi(MainWindow)
         else:
-            foutmelding("Incorrecte inloggegevens", "Een van de inloggegevens is incorrect", "Controleert u alstublieft of alle ingevoerde gegevens correct zijn. Neem anders contact op met het ICT-servicedesk.")
+            foutmelding("Incorrecte inloggegevens", "Een van de inloggegevens is incorrect!", "Controleert u alstublieft of alle ingevoerde gegevens correct zijn. Neem anders contact op met het ICT-servicedesk.")
 
 
 app = QtWidgets.QApplication(sys.argv)

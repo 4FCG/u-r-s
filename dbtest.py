@@ -46,14 +46,14 @@ def get_data(tablename, specifier):
 
 
 def rij_verwijder(tabel, kolom, waarde):
-    cursor.execute("DELETE FROM " + str(tabel) + " WHERE `" + str(kolom) + "` = '" + str(waarde) + "';")
+    cursor.execute(str("DELETE FROM " + str(tabel) + " WHERE `" + str(kolom) + "` = '" + str(waarde) + "';"))
 
 
 def rij_toevoegen(tabel, kolommen, waarden):
     kolommen_str = str(kolommen).replace("\'", "`")
-    print(("INSERT INTO " + (tabel) + " " + str(kolommen_str) + " VALUES " + str(waarden) + ";"))
+    cursor.execute(str("INSERT INTO " + (tabel) + " " + str(kolommen_str) + " VALUES " + str(waarden) + ";"))
 
 def rij_bijwerken(tabel, kolommen, waarden):
     kolommen_str = str(kolommen).replace("\'", "`")
-    cursor.execute("UPDATE " + str(tabel) + " " + str(kolommen_str) + " VALUES " + str(waarden) + ";")
+    cursor.execute(str("UPDATE " + str(tabel) + " " + str(kolommen_str) + " VALUES " + str(waarden) + ";"))
 
