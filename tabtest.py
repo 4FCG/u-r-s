@@ -8,11 +8,16 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from edit_table_widget import Edit_table
+from dbtest import rij_verwijder
+from dbtest import rij_toevoegen
+from dbtest import rij_bijwerken
 
 
 class Popup(QtWidgets.QMainWindow):
     def __init__(self, werkdag_id, datum, user):
         super().__init__()
+
+        # Venster: Uiterlijk
         self.setFixedSize(800, 370)
         self.setWindowTitle("URS: Uren aanpassen voor " + datum)
         self.setWindowIcon(QtGui.QIcon('images\icon.png'))
@@ -35,41 +40,41 @@ class Popup(QtWidgets.QMainWindow):
         self.pushButton2.setText("Opslaan")
         self.pushButton2.clicked.connect(self.save)
 
-    def save(self):
-    # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-
-        # Toon de wijzigingen.
-        print(self.user, self.changelog)
-
-        live = 1
-
-        for row in self.changelog:
-            print(row)
-            if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
-                if live == 1:
-                    rij_verwijder("ACTIVITEIT", "werkdag_id", row['data']['dag_id'])
-
-                else:
-                    print("Verwijderen!")
-
-            elif row['type'] == "toevoeging":
-                if live == 1:
-                    rij_toevoegen("ACTIVITEIT", ("werkdag_id", "starttijd", "uren", "activiteiten_id", "opmerking"), (row['data']['werkdag_id'], row['data']['starttijd'], row['data']['uren'], row['data']['activiteiten_id'], row['data']['opmerking']))
-                else:
-                    print("Toevoegen!")
-
-            elif row['type'] == "verandering":
-                if live == 1:
-                    rij_bijwerken("ACTIVITEIT", ("werkdag_id", "starttijd", "uren", "activiteiten_id", "opmerking"), (row['data']['werkdag_id'], row['data']['starttijd'], row['data']['uren'], row['data']['activiteiten_id'], row['data']['opmerking']))
-                else:
-                    print("Bijwerken!")
-
-        # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
-        self.tableWidget.load_data()
-
-
-        # Roep de "build_table()" functie aan om de tabel te vullen met de opgehaalde gegevens.
-        self.tableWidget.build_table()
+    # def save(self):
+    # # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
+    #
+    #     # Toon de wijzigingen.
+    #     print(self.user, self.changelog)
+    #
+    #     live = 1
+    #
+    #     for row in self.changelog:
+    #         print(row)
+    #         if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
+    #             if live == 1:
+    #                 rij_verwijder("ACTIVITEIT", "activiteit_id", row['data']['activiteit_id'])
+    #
+    #             else:
+    #                 print("Verwijderen!")
+    #
+    #         elif row['type'] == "toevoeging":
+    #             if live == 1:
+    #                 rij_toevoegen("ACTIVITEIT", ("werkdag_id", "starttijd", "uren", "activiteiten_id", "opmerking"), (row['data']['werkdag_id'], row['data']['starttijd'], row['data']['uren'], row['data']['activiteiten_id'], row['data']['opmerking']))
+    #             else:
+    #                 print("Toevoegen!")
+    #
+    #         elif row['type'] == "verandering":
+    #             if live == 1:
+    #                 rij_bijwerken("ACTIVITEIT", ("werkdag_id", "starttijd", "uren", "activiteiten_id", "opmerking"), (row['data']['werkdag_id'], row['data']['starttijd'], row['data']['uren'], row['data']['activiteiten_id'], row['data']['opmerking']))
+    #             else:
+    #                 print("Bijwerken!")
+    #
+    #     # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
+    #     self.tableWidget.load_data()
+    #
+    #
+    #     # Roep de "build_table()" functie aan om de tabel te vullen met de opgehaalde gegevens.
+    #     self.tableWidget.build_table()
 
 
 class Werkdag(Edit_table):
@@ -150,7 +155,30 @@ class Ui_MainWindow(object):
             self.pushButton4.setGeometry(QtCore.QRect(101, 320, 81, 23))
             self.pushButton4.setObjectName("pushButton")
             self.pushButton4.setText("Opslaan")
-            self.pushButton4.clicked.connect(self.tableWidget.save)
+            #self.pushButton4.clicked.connect(self.activiteiten_save())
+            self.pushButton4.clicked.connect(self.tableWidget2.save)
+
+            # # Rechten aanpassen
+            # self.tabWidget.addTab(self.tab, "")
+            # self.tabWidget.setTabText(self.tabWidget.indexOf(
+            #     self.tab), "Rechten")
+            # self.tableWidget = Edit_table(self.tab, 'rechten', {
+            #     'functie_id': 'editable', 'activiteiten_id': 'editable'}, self.inlogdata)
+            # self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
+            # self.tableWidget.setObjectName("tableWidget")
+            #
+            # self.pushButton = QtWidgets.QPushButton(self.tab)
+            # self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
+            # self.pushButton.setObjectName("pushButton")
+            # self.pushButton.setText("Verwijderen")
+            # self.pushButton.clicked.connect(self.tableWidget.delete_row)
+            #
+            # self.pushButton4 = QtWidgets.QPushButton(self.tab)
+            # self.pushButton4.setGeometry(QtCore.QRect(101, 320, 81, 23))
+            # self.pushButton4.setObjectName("pushButton")
+            # self.pushButton4.setText("Opslaan")
+            # #self.pushButton4.clicked.connect(self.rechten_save())
+            # self.pushButton4.clicked.connect(self.tableWidget2.save)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -159,3 +187,77 @@ class Ui_MainWindow(object):
 
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    # def activiteiten_save(self):
+    # # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
+    #
+    #     # Toon de wijzigingen.
+    #     print(self.user, self.changelog)
+    #
+    #     live = 1
+    #
+    #     for row in self.changelog:
+    #         print(row)
+    #         if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
+    #             if live == 1:
+    #                 rij_verwijder("ACTIVITEITEN", "activiteiten_id", row['data']['activiteiten_id'])
+    #
+    #             else:
+    #                 print("Verwijderen!")
+    #
+    #         elif row['type'] == "toevoeging":
+    #             if live == 1:
+    #                 rij_toevoegen("ACTIVITEITEN", ("werkdag_id", "starttijd", "uren", "activiteiten_id", "opmerking"), (row['data']['werkdag_id'], row['data']['starttijd'], row['data']['uren'], row['data']['activiteiten_id'], row['data']['opmerking']))
+    #             else:
+    #                 print("Toevoegen!")
+    #
+    #         elif row['type'] == "verandering":
+    #             if live == 1:
+    #                 rij_bijwerken("ACTIVITEITEN", ("activiteitnaam", "omschrijving"), (row['data']['activiteitnaam'], row['data']['omschrijving']))
+    #             else:
+    #                 print("Bijwerken!")
+    #
+    #     # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
+    #     self.tableWidget.load_data()
+    #
+    #
+    #     # Roep de "build_table()" functie aan om de tabel te vullen met de opgehaalde gegevens.
+    #     self.tableWidget.build_table()
+    #
+    # def rechten_save(self):
+    # # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
+    #
+    #     # Toon de wijzigingen.
+    #     print(self.user, self.changelog)
+    #
+    #     live = 1
+    #
+    #     for row in self.changelog:
+    #         print(row)
+    #         if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
+    #             if live == 1:
+    #                 # Deze functie moet met meerdere primary keys kunnen werken!
+    #                 #rij_verwijder("RECHTEN", "functie_id", row['data']['functie_id'])
+    #                 print("Fix mij eerst!")
+    #
+    #             else:
+    #                 print("Verwijderen!")
+    #
+    #         elif row['type'] == "toevoeging":
+    #             if live == 1:
+    #                 rij_toevoegen("RECHTEN", ("functie_id", "activiteiten_id"), (row['data']['functie_id'], row['data']['activiteiten_id']))
+    #             else:
+    #                 print("Toevoegen!")
+    #
+    #         elif row['type'] == "verandering":
+    #             if live == 1:
+    #                 rij_bijwerken("RECHTEN", ("functie_id", "activiteiten_id"), (row['data']['functie_id'], row['data']['activiteiten_id']))
+    #             else:
+    #                 print("Bijwerken!")
+    #
+    #     # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
+    #     self.tableWidget.load_data()
+    #
+    #
+    #     # Roep de "build_table()" functie aan om de tabel te vullen met de opgehaalde gegevens.
+    #     self.tableWidget.build_table()
