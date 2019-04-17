@@ -1,0 +1,67 @@
+CREATE TABLE `casus`.`medewerker` (
+  `medewerker_id` INT NOT NULL AUTO_INCREMENT,
+  `voornaam` VARCHAR(100) NOT NULL,
+  `achternaam` VARCHAR(100) NOT NULL,
+  `wachtwoord` CHAR(128) NOT NULL,
+  `functie_id` INT NULL,
+  `type_medewerker` TINYINT(1) NOT NULL,
+  `mag_thuis` TINYINT(1) NOT NULL,
+  `woonafstand` FLOAT NOT NULL,
+  `contracturen` INT NOT NULL,
+  `uurtarief` DECIMAL(5,2) NOT NULL,
+  `manager_id` INT NULL,
+  `weekslot` TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`medewerker_id`),
+  UNIQUE INDEX `functie_id_UNIQUE` (`functie_id` ASC),
+  UNIQUE INDEX `manager_id_UNIQUE` (`manager_id` ASC));
+
+CREATE TABLE `casus`.`functie` (
+  `functie_id` INT NOT NULL AUTO_INCREMENT,
+  `functienaam` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`functie_id`));
+
+CREATE TABLE `casus`.`activiteit` (
+  `activiteit_id` INT NOT NULL AUTO_INCREMENT,
+  `activiteitnaam` VARCHAR(100) NOT NULL,
+  `omschrijving` MEDIUMTEXT NOT NULL,
+  PRIMARY KEY (`activiteit_id`));
+  
+CREATE TABLE `casus`.`werkdag` (
+  `werkdag_id` INT NOT NULL AUTO_INCREMENT,
+  `datum` DATE NOT NULL,
+  `medewerker_id` INT NOT NULL,
+  `thuisofkantoor` TINYINT(1) NOT NULL,
+  `starttijd` TIME NOT NULL,
+  `eindtijd` TIME NOT NULL,
+  PRIMARY KEY (`werkdag_id`),
+  UNIQUE INDEX `medewerker_id_UNIQUE` (`medewerker_id` ASC));
+
+CREATE TABLE `casus`.`werkactiviteit` (
+  `werkactiviteit_id` INT NOT NULL AUTO_INCREMENT,
+  `werkdag_id` INT NOT NULL,
+  `starttijd` TIME NOT NULL,
+  `uren` FLOAT NOT NULL,
+  `activiteit_id` INT NOT NULL,
+  `opmerking` MEDIUMTEXT NULL,
+  PRIMARY KEY (`werkactiviteit_id`),
+  UNIQUE INDEX `werkdag_id_UNIQUE` (`werkdag_id` ASC),
+  UNIQUE INDEX `activiteit_id_UNIQUE` (`activiteit_id` ASC));
+  
+CREATE TABLE `casus`.`rechten` (
+  `functie_id` INT NOT NULL,
+  `activiteit_id` INT NOT NULL,
+  PRIMARY KEY (`functie_id`, `activiteit_id`));
+
+ALTER TABLE `casus`.`medewerker` 
+ADD INDEX `functie_id_idx` (`functie_id` ASC);
+ALTER TABLE `casus`.`medewerker` 
+ADD CONSTRAINT `manager_id`
+  FOREIGN KEY (`medewerker_id`)
+  REFERENCES `casus`.`medewerker` (`medewerker_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `functie_id`
+  FOREIGN KEY (`functie_id`)
+  REFERENCES `casus`.`functie` (`functie_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
