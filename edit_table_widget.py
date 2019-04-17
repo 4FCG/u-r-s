@@ -5,8 +5,9 @@ from dbtest import get_data
 
 
 class Edit_table(QtWidgets.QTableWidget):
-    def __init__(self, pushvar, tablename, columns, user, specifier=None):
+    def __init__(self, pushvar, tablename, columns, user, specifier=None, no_new=False):
         super().__init__(pushvar)
+        self.no_new = no_new
         self.specifier = specifier
         self.tablename = tablename.lower()
         columns[(self.tablename + '_id')] = 'locked'
@@ -27,10 +28,14 @@ class Edit_table(QtWidgets.QTableWidget):
         self.data = get_data(self.tablename.upper(), self.specifier)
 
     def build_table(self):
+
         self.disabled = True
-        self.setRowCount(len(self.data) + 1)
-        self.data.append({name: '*' if self.columns[name] !=
-                          'editable' else None for name in self.columnnames})
+        if self.no_new:
+            self.setRowCount(len(self.data))
+        else:
+            self.setRowCount(len(self.data) + 1)
+            self.data.append({name: '*' if self.columns[name] !=
+                              'editable' else None for name in self.columnnames})
 
         for row_index, row in enumerate(self.data):
             for item_index, name in enumerate(self.columnnames):
@@ -59,7 +64,7 @@ class Edit_table(QtWidgets.QTableWidget):
             item_row_data = {self.columnnames[item.column(
             )]: None if item is None else item.text() for item in items}
 
-            if item.row() == self.rowCount() - 1:
+            if item.row() == self.rowCount() - 1 and not self.no_new:
                 if '' not in item_row_data.values():
                     self.data[item.row()] = item_row_data
                     self.changelog.append(
