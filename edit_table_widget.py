@@ -185,6 +185,7 @@ class Edit_table(QtWidgets.QTableWidget):
             if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
                 if live == 1:
                     rij_verwijder("DAG", "dag_id", row['data']['dag_id'])
+                    rij_verwijder("ACTIVITEIT", "werkdag_id", row['data']['dag_id'])
 
                 else:
                     print("Verwijderen!")
@@ -200,8 +201,6 @@ class Edit_table(QtWidgets.QTableWidget):
                     rij_bijwerken("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
                 else:
                     print("Bijwerken!")
-
-
 
         # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
         self.load_data()
