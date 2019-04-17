@@ -43,3 +43,19 @@ def get_data(tablename, specifier):
         data.append({column[0]: row[index] for index, column in enumerate(columns)})
     return data
 #add_user('John', 'Depper', 'TheJohn', 2, 1, 1, 40.5, 36, 16.50, None)
+
+
+def rij_verwijder(tabel, kolom, waarde):
+    #cursor.execute
+    print("DELETE FROM " + str(tabel) + " WHERE '" + str(veld) + "' = '" + str(waarde) + "';")
+
+
+def rij_toevoegen(tabel, kolommen, waarden):
+    #cursor.execute
+    print("INSERT INTO " + "casus" + "." + (tabel) + " " + str(kolommen) + " VALUES " + str(waarden) + ";")
+
+
+def rij_bijwerken(tabel, kolommen, waarden):
+    #cursor.execute
+    print("UPDATE " + str(tabel) + " " + str(kolommen) + " VALUES " + str(waarden) + ";")
+

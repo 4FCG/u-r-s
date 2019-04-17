@@ -1,5 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 from dbtest import get_data
+from dbtest import rij_toevoegen
+from dbtest import rij_verwijder
 # columns: {'columnname': locked/editable}
 # change mysql table to name every tables primary key tablename_id
 
@@ -175,6 +177,31 @@ class Edit_table(QtWidgets.QTableWidget):
 
         # Toon de wijzigingen.
         print(self.user, self.changelog)
+
+        live = 1
+
+        for row in self.changelog:
+            print(row)
+            if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
+                if live == 1:
+                    rij_verwijder("DAG", "dag_id", row['data']['dag_id'])
+
+                else:
+                    print("Verwijderen!")
+
+            elif row['type'] == "toevoeging":
+                if live == 1:
+                    rij_toevoegen("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                else:
+                    print("Toevoegen!")
+
+            elif row['type'] == "verandering":
+                if live == 1:
+                    rij_bijwerken("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                else:
+                    print("Bijwerken!")
+
+
 
         # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
         self.load_data()
