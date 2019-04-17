@@ -7,7 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from dbtest import get_data
+from lib_database import get_data
 
 
 class Ui_widget_rechten(object):

@@ -1,6 +1,6 @@
 import mysql.connector
 import config
-from pbkdf2 import hash_password, verify_password
+from lib_password import hash_password, verify_password
 
 database = mysql.connector.connect(
     host=config.mysql['host'],

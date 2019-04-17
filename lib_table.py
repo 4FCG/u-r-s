@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
-from dbtest import get_data
-from dbtest import rij_toevoegen
-from dbtest import rij_verwijder
+from lib_database import get_data
+from lib_database import rij_toevoegen
+from lib_database import rij_verwijder
 # columns: {'columnname': locked/editable}
 # change mysql table to name every tables primary key tablename_id
 
@@ -174,14 +174,9 @@ class Edit_table(QtWidgets.QTableWidget):
 
     def save(self):
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-
-        # Toon de wijzigingen.
-        print(self.user, self.changelog)
-
         live = 1
 
         for row in self.changelog:
-            print(row)
             if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
                 if live == 1:
                     rij_verwijder("DAG", "dag_id", row['data']['dag_id'])

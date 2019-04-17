@@ -7,10 +7,10 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from edit_table_widget import Edit_table
-from dbtest import rij_verwijder
-from dbtest import rij_toevoegen
-from dbtest import rij_bijwerken
+from lib_table import Edit_table
+from lib_database import rij_verwijder
+from lib_database import rij_toevoegen
+from lib_database import rij_bijwerken
 
 
 class Popup(QtWidgets.QMainWindow):
@@ -38,7 +38,7 @@ class Popup(QtWidgets.QMainWindow):
         self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
         self.pushButton2.setObjectName("pushButton")
         self.pushButton2.setText("Opslaan")
-        self.pushButton2.clicked.connect(self.save)
+        #self.pushButton2.clicked.connect(self.save)
 
     # def save(self):
     # # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
