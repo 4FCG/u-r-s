@@ -22,10 +22,13 @@ def add_user(voornaam, achternaam, wachtwoord, functie_id, type_medewerker, mag_
 
 def login(voornaam, achternaam, wachtwoord):
     cursor.execute(
-        "SELECT medewerker_id, voornaam, wachtwoord FROM MEDEWERKER WHERE voornaam = %s AND achternaam = %s;", (voornaam, achternaam))
-    for result in list(cursor):
-        if verify_password(result[2], wachtwoord):
-            return {'id': result[0], 'naam': result[1]}
+        "SELECT * FROM MEDEWERKER WHERE voornaam = %s AND achternaam = %s;", (voornaam, achternaam))
+    values = list(cursor)
+    cursor.execute("SHOW columns FROM MEDEWERKER;")
+    columns = list(cursor)
+    for row in values:
+        if verify_password(row[3], wachtwoord):
+            return {columns[index][0]: value for index, value in enumerate(row)}
     return False
 
 

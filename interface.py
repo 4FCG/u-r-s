@@ -1,29 +1,30 @@
 import login
-import tabletest
+import tabtest
 import dbtest
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Loginscherm(login.Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(MainWindow)
+        self.pushButton.clicked.connect(self.login)
+
     def login(self):
-        if dbtest.login(self.lineEdit.text(), self.lineEdit_2.text(), self.lineEdit_3.text()):
-            scherm2.setupUi(MainWindow)
+        loginresult = dbtest.login(self.lineEdit.text(
+        ), self.lineEdit_2.text(), self.lineEdit_3.text())
+        if loginresult:
+            mainscreen = tabtest.Ui_MainWindow(loginresult)
+            mainscreen.setupUi(MainWindow)
         else:
             print("WONG")
-
-
-class Activiteitenscherm(tabletest.Ui_MainWindow):
-    pass
 
 
 app = QtWidgets.QApplication(sys.argv)
 MainWindow = QtWidgets.QMainWindow()
 
 scherm = Loginscherm()
-scherm.setupUi(MainWindow)
-
-scherm2 = Activiteitenscherm()
 
 MainWindow.show()
 sys.exit(app.exec_())

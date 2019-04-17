@@ -5,7 +5,7 @@ from dbtest import get_data
 
 
 class Edit_table(QtWidgets.QTableWidget):
-    def __init__(self, pushvar, tablename, columns, specifier=None):
+    def __init__(self, pushvar, tablename, columns, user, specifier=None):
         super().__init__(pushvar)
         self.specifier = specifier
         self.tablename = tablename.lower()
@@ -13,6 +13,7 @@ class Edit_table(QtWidgets.QTableWidget):
         self.columns = columns
         self.columnnames = list(self.columns.keys())
         self.disabled = False
+        self.user = user
         self.changelog = []
         self.setColumnCount(len(columns))
         for index, name in enumerate(self.columnnames):
@@ -28,8 +29,8 @@ class Edit_table(QtWidgets.QTableWidget):
     def build_table(self):
         self.disabled = True
         self.setRowCount(len(self.data) + 1)
-        self.data.append({name: '*' if self.columns[name] ==
-                          'locked' else None for name in self.columnnames})
+        self.data.append({name: '*' if self.columns[name] !=
+                          'editable' else None for name in self.columnnames})
 
         for row_index, row in enumerate(self.data):
             for item_index, name in enumerate(self.columnnames):
@@ -39,6 +40,10 @@ class Edit_table(QtWidgets.QTableWidget):
                 elif self.columns[name] == 'editable':
                     item.setFlags(QtCore.Qt.ItemIsSelectable |
                                   QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+                else:
+                    if item.text() == '*':
+                        item.setText(self.columns[name])
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
                 self.setItem(row_index, item_index, item)
         self.resizeColumnsToContents()
 
@@ -101,3 +106,9 @@ class Edit_table(QtWidgets.QTableWidget):
             self.data.pop()
             self.build_table()
         self.disabled = False
+
+    def save(self):
+        # send changelog
+        print(self.user, self.changelog)
+        self.load_data()
+        self.build_table()
