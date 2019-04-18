@@ -21,10 +21,11 @@ class Popup(QtWidgets.QMainWindow):
         self.setFixedSize(800, 370)
         self.setWindowTitle("URS: Uren aanpassen voor " + datum)
         self.setWindowIcon(QtGui.QIcon('images\icon.png'))
+        self.no_new = no_new
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setGeometry(QtCore.QRect(10, 10, 765, 600))
         self.tableWidget = Edit_table(self.centralwidget, 'activiteit', {
-                                      'starttijd': 'editable', 'uren': 'editable', 'activiteiten_id': 'editable', 'opmerking': 'editable', 'werkdag_id': werkdag_id}, user, specifier="WHERE werkdag_id =" + werkdag_id + ";", no_new)
+                                      'starttijd': 'editable', 'uren': 'editable', 'activiteiten_id': 'editable', 'opmerking': 'editable', 'werkdag_id': werkdag_id}, user, specifier="WHERE werkdag_id =" + werkdag_id + ";", no_new=self.no_new)
         self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
         self.tableWidget.setObjectName("tableWidget")
 
@@ -82,15 +83,14 @@ class Werkdag(Edit_table):
         super().__init__(pushvar, tablename, columns, user, specifier, no_new)
         self.itemDoubleClicked.connect(self.dubbelklik)
         self.inlogdata = user
+        self.no_new = no_new
 
     def dubbelklik(self, item):
-        items = [self.item(self.currentRow(), i)
-                 for i in range(self.columnCount())]
-        item_row_data = {self.columnnames[item.column(
-        )]: None if item is None else item.text() for item in items}
+        item_row_data = self.get_row_data(item.row())
 
         if item_row_data['dag_id'] != '*':
-            self.newscreen = Popup(item_row_data['dag_id'], item_row_data['datum'], self.inlogdata)
+            self.newscreen = Popup(
+                item_row_data['dag_id'], item_row_data['datum'], self.inlogdata, no_new=self.no_new)
             self.newscreen.show()
 
 
@@ -125,10 +125,7 @@ class Medewerker_overzicht(Edit_table):
         self.inlogdata = user
 
     def dubbelklik(self, item):
-        items = [self.item(self.currentRow(), i)
-                 for i in range(self.columnCount())]
-        item_row_data = {self.columnnames[item.column(
-        )]: None if item is None else item.text() for item in items}
+        item_row_data = self.get_row_data(item.row())
 
         if item_row_data['medewerker_id'] != '*':
             self.newscreen = Werkdagen_popup(item_row_data['medewerker_id'], self.inlogdata)

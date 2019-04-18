@@ -1,4 +1,6 @@
 .idea/
+*.xml
+*.iml
 config.py
 convert.bat
 # Byte-compiled / optimized / DLL files

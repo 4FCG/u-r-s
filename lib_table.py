@@ -86,10 +86,7 @@ class Edit_table(QtWidgets.QTableWidget):
             self.disabled = True
 
             # this is done twice, function?
-            items = [self.item(item.row(), i)
-                     for i in range(self.columnCount())]
-            item_row_data = {self.columnnames[item.column(
-            )]: None if item is None else item.text() for item in items}
+            item_row_data = self.get_row_data(item.row())
 
             # Indien de huidige rij ook de laatste rij is.
             if item.row() == self.rowCount() - 1 and not self.no_new:
@@ -141,13 +138,7 @@ class Edit_table(QtWidgets.QTableWidget):
             # Verwijder de huidige rij uit de "data"-list.
             self.data.pop(self.currentRow())
 
-            # "items" word gevuld met de gegevens van de huidige rij.
-            items = [self.item(self.currentRow(), i)
-                     for i in range(self.columnCount())]
-
-            # "item_row_data" word gevuld met
-            item_row_data = {self.columnnames[item.column(
-            )]: None if item is None else item.text() for item in items}
+            item_row_data = self.get_row_data(self.currentRow())
 
             # Indien de waarde uit "item_row_data" gelijk is aan een "*":
             if item_row_data[self.tablename + '_id'] == '*':
@@ -206,3 +197,11 @@ class Edit_table(QtWidgets.QTableWidget):
 
         # Roep de "build_table()" functie aan om de tabel te vullen met de opgehaalde gegevens.
         self.build_table()
+
+    def get_row_data(self, row):
+        # "items" word gevuld met de gegevens van de huidige rij.
+        items = [self.item(row, i)
+                 for i in range(self.columnCount())]
+        # De waardes uit items worden gekoppeld aan hun kolomnaam als sleutelwaarde
+        return {self.columnnames[item.column(
+        )]: None if item is None else item.text() for item in items}
