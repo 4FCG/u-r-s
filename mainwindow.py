@@ -14,7 +14,7 @@ from lib_database import rij_bijwerken
 
 
 class Popup(QtWidgets.QMainWindow):
-    def __init__(self, werkdag_id, datum, user):
+    def __init__(self, werkdag_id, datum, user, no_new=False):
         super().__init__()
 
         # Venster: Uiterlijk
@@ -24,7 +24,7 @@ class Popup(QtWidgets.QMainWindow):
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setGeometry(QtCore.QRect(10, 10, 765, 600))
         self.tableWidget = Edit_table(self.centralwidget, 'activiteit', {
-                                      'starttijd': 'editable', 'uren': 'editable', 'activiteiten_id': 'editable', 'opmerking': 'editable', 'werkdag_id': werkdag_id}, user, specifier="WHERE werkdag_id =" + werkdag_id + ";")
+                                      'starttijd': 'editable', 'uren': 'editable', 'activiteiten_id': 'editable', 'opmerking': 'editable', 'werkdag_id': werkdag_id}, user, specifier="WHERE werkdag_id =" + werkdag_id + ";", no_new)
         self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
         self.tableWidget.setObjectName("tableWidget")
 
@@ -38,7 +38,7 @@ class Popup(QtWidgets.QMainWindow):
         self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
         self.pushButton2.setObjectName("pushButton")
         self.pushButton2.setText("Opslaan")
-        #self.pushButton2.clicked.connect(self.save)
+        self.pushButton2.clicked.connect(self.tableWidget.save)
 
     # def save(self):
     # # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
@@ -78,8 +78,8 @@ class Popup(QtWidgets.QMainWindow):
 
 
 class Werkdag(Edit_table):
-    def __init__(self, pushvar, tablename, columns, user, specifier=None):
-        super().__init__(pushvar, tablename, columns, user, specifier)
+    def __init__(self, pushvar, tablename, columns, user, specifier=None, no_new=False):
+        super().__init__(pushvar, tablename, columns, user, specifier, no_new)
         self.itemDoubleClicked.connect(self.dubbelklik)
         self.inlogdata = user
 
@@ -91,6 +91,47 @@ class Werkdag(Edit_table):
 
         if item_row_data['dag_id'] != '*':
             self.newscreen = Popup(item_row_data['dag_id'], item_row_data['datum'], self.inlogdata)
+            self.newscreen.show()
+
+
+class Werkdagen_popup(QtWidgets.QMainWindow):
+    def __init__(self, medewerker_id, user):
+        super().__init__()
+        self.resize(800, 600)
+        self.centralwidget = QtWidgets.QWidget(self)
+        self.centralwidget.setGeometry(QtCore.QRect(10, 10, 765, 600))
+        self.tableWidget = Werkdag(self.centralwidget, 'dag', {
+            'datum': 'locked', 'thuisofkantoor': 'locked', 'starttijd': 'locked', 'eindtijd': 'locked', 'goedgekeurd': 'editable', 'medewerker_id': 'locked'}, user, specifier="WHERE medewerker_id =" + medewerker_id + ";", no_new=True)
+        self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
+        self.tableWidget.setObjectName("tableWidget")
+
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton.setText("Delete")
+        self.pushButton.clicked.connect(self.tableWidget.delete_row)
+
+        self.pushButton2 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
+        self.pushButton2.setObjectName("pushButton")
+        self.pushButton2.setText("Opslaan")
+        self.pushButton2.clicked.connect(self.tableWidget.save)
+
+
+class Medewerker_overzicht(Edit_table):
+    def __init__(self, pushvar, tablename, columns, user, specifier=None, no_new=False):
+        super().__init__(pushvar, tablename, columns, user, specifier, no_new)
+        self.itemDoubleClicked.connect(self.dubbelklik)
+        self.inlogdata = user
+
+    def dubbelklik(self, item):
+        items = [self.item(self.currentRow(), i)
+                 for i in range(self.columnCount())]
+        item_row_data = {self.columnnames[item.column(
+        )]: None if item is None else item.text() for item in items}
+
+        if item_row_data['medewerker_id'] != '*':
+            self.newscreen = Werkdagen_popup(item_row_data['medewerker_id'], self.inlogdata)
             self.newscreen.show()
 
 
@@ -155,9 +196,19 @@ class Ui_MainWindow(object):
             self.pushButton4.setGeometry(QtCore.QRect(101, 320, 81, 23))
             self.pushButton4.setObjectName("pushButton")
             self.pushButton4.setText("Opslaan")
-            #self.pushButton4.clicked.connect(self.activiteiten_save())
-            self.pushButton4.clicked.connect(self.tableWidget2.save)
+            # self.pushButton4.clicked.connect(self.activiteiten_save())
+            self.pushButton4.clicked.connect(self.tableWidget.save)
 
+            # uren goedkeuren
+            self.tab_3 = QtWidgets.QWidget()
+            self.tab_3.setObjectName("tab_3")
+            self.tabWidget.addTab(self.tab_3, "")
+            self.tabWidget.setTabText(self.tabWidget.indexOf(
+                self.tab_3), "Uren goedkeuren")
+            self.tableWidget3 = Medewerker_overzicht(self.tab_3, 'medewerker', {
+                'voornaam': 'locked', 'achternaam': 'locked', 'functie_id': 'editable', 'manager_id': 'locked', 'weekslot': 'editable'}, self.inlogdata, specifier="WHERE manager_id =" + str(self.inlogdata['medewerker_id']) + ";", no_new=True)
+            self.tableWidget3.setGeometry(QtCore.QRect(10, 10, 765, 300))
+            self.tableWidget3.setObjectName("tableWidget3")
             # # Rechten aanpassen
             # self.tabWidget.addTab(self.tab, "")
             # self.tabWidget.setTabText(self.tabWidget.indexOf(
