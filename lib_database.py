@@ -57,3 +57,29 @@ def rij_bijwerken(tabel, kolommen, waarden):
     kolommen_str = str(kolommen).replace("\'", "`")
     cursor.execute(str("UPDATE " + str(tabel) + " " + str(kolommen_str) + " VALUES " + str(waarden) + ";"))
 
+
+    def wijzigingen_doorvoeren(changelog, kolommen):
+    # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
+        live = 1
+
+        for row in changelog:
+            if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
+                if live == 1:
+                    rij_verwijder(row['tabel'], "row['tabel'][1]", row['data'][1])
+                    rij_verwijder("ACTIVITEIT", "werkdag_id", row['data']['dag_id'])
+
+                else:
+                    print("Verwijderen!")
+
+            elif row['type'] == "toevoeging":
+                if live == 1:
+                    # ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd")
+                    rij_toevoegen(row['tabel'], kolommen, (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                else:
+                    print("Toevoegen!")
+
+            elif row['type'] == "verandering":
+                if live == 1:
+                    rij_bijwerken("DAG", kolommen, (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                else:
+                    print("Bijwerken!")
