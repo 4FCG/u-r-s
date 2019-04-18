@@ -45,41 +45,80 @@ def get_data(tablename, specifier):
 #add_user('John', 'Depper', 'TheJohn', 2, 1, 1, 40.5, 36, 16.50, None)
 
 
-def rij_verwijder(tabel, kolom, waarde):
-    cursor.execute(str("DELETE FROM " + str(tabel) + " WHERE `" + str(kolom) + "` = '" + str(waarde) + "';"))
-
-
-def rij_toevoegen(tabel, kolommen, waarden):
-    kolommen_str = str(kolommen).replace("\'", "`")
-    cursor.execute(str("INSERT INTO " + (tabel) + " " + str(kolommen_str) + " VALUES " + str(waarden) + ";"))
-
-def rij_bijwerken(tabel, kolommen, waarden):
-    kolommen_str = str(kolommen).replace("\'", "`")
-    cursor.execute(str("UPDATE " + str(tabel) + " " + str(kolommen_str) + " VALUES " + str(waarden) + ";"))
-
-
-    def wijzigingen_doorvoeren(changelog, kolommen):
+def wijzigingen_doorvoeren(changelog):
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
         live = 1
-
         for row in changelog:
-            if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
+            tabel = row['table']
+            # De primaire sleutel zit altijd in een kolom met als naam de naam van de tabel met daarachter "_id".
+            primaire_sleutel = str(tabel.lower() + "_id")
+            if row['type'] == 'toevoeging':
+                row['data'].pop(primaire_sleutel, None)
+            kolommen = list(row['data'].keys())
+            waarden = list(row['data'].values())
+
+            if row['type'] == "verwijdering":
                 if live == 1:
-                    rij_verwijder(row['tabel'], "row['tabel'][1]", row['data'][1])
-                    rij_verwijder("ACTIVITEIT", "werkdag_id", row['data']['dag_id'])
+                    query_variabelen = []
+                    query_variabelen += tabel, primaire_sleutel, row['data'][primaire_sleutel]
+                    cursor.execute("DELETE FROM %s WHERE `%s` = %s;", query_variabelen)
+
+                    # Speciale uitzondering voor de "DAG" tabel: Wanneer een dag verwijderd word dient ook de activiteiten van deze tabel verwijderd te worden.
+                    if tabel == "DAG":
+                        query_variabelen = []
+                        query_variabelen += "ACTIVITEIT", "werkdag_id", row['data']['dag_id']
+                        cursor.execute("DELETE FROM %s WHERE `%s` = %s;", query_variabelen)
 
                 else:
                     print("Verwijderen!")
 
             elif row['type'] == "toevoeging":
                 if live == 1:
-                    # ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd")
-                    rij_toevoegen(row['tabel'], kolommen, (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                    query_pre = "INSERT INTO `%s` ("
+                    query_middel = ") VALUES ("
+                    query_post = ")"
+                    for kolom in kolommen:
+                        query_pre += "`%s`, "
+
+                    for waarde in waarden:
+                        query_middel += "%s, "
+
+                    query_waarden = [tabel]
+                    for kolom in kolommen:
+                        query_waarden.append(kolom)
+                    for waarde in waarden:
+                        query_waarden.append(waarde)
+
+                    query = query_pre[:-2] + query_middel[:-2] + query_post
+                    print("Bijwerking, Query:" + query)
+                    print("Bijwerking, Query waarden:" + str(query_waarden))
+
+                    cursor.execute(query, query_waarden)
+
                 else:
                     print("Toevoegen!")
 
             elif row['type'] == "verandering":
                 if live == 1:
-                    rij_bijwerken("DAG", kolommen, (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                    query_pre = "UPDATE %s ("
+                    query_middel = ") VALUES ("
+                    query_post = ")"
+                    for kolom in kolommen:
+                        query_pre += "`%s`, "
+
+                    for waarde in waarden:
+                        query_middel += "%s, "
+
+                    query_waarden = [tabel]
+                    for kolom in kolommen:
+                        query_waarden.append(kolom)
+                    for waarde in waarden:
+                        query_waarden.append(waarde)
+
+                    query = query_pre[:-2] + query_middel[:-2] + query_post
+                    print("Verandering, Query: " + query)
+                    print("Verandering, Query waarden: " + str(query_waarden))
+
+                    cursor.execute(query, query_waarden)
                 else:
                     print("Bijwerken!")

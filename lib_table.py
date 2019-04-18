@@ -1,7 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 from lib_database import get_data
-from lib_database import rij_toevoegen
-from lib_database import rij_verwijder
+from lib_database import wijzigingen_doorvoeren
 # columns: {'columnname': locked/editable}
 # change mysql table to name every tables primary key tablename_id
 
@@ -178,33 +177,7 @@ class Edit_table(QtWidgets.QTableWidget):
             self.disabled = False
 
     def save(self):
-        # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-        live = 0
-        print(self.changelog)
-        for row in self.changelog:
-            if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
-                if live == 1:
-                    rij_verwijder("DAG", "dag_id", row['data']['dag_id'])
-                    rij_verwijder("ACTIVITEIT", "werkdag_id", row['data']['dag_id'])
-
-                else:
-                    print("Verwijderen!")
-
-            elif row['type'] == "toevoeging":
-                if live == 1:
-                    rij_toevoegen("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (
-                        row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
-                else:
-                    print("Toevoegen!")
-
-            elif row['type'] == "verandering":
-                if live == 1:
-                    rij_bijwerken("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (
-                        row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
-                else:
-                    print("Bijwerken!")
-
-        # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
+        wijzigingen_doorvoeren(self.changelog)
         self.load_data()
 
         # Roep de "build_table()" functie aan om de tabel te vullen met de opgehaalde gegevens.
