@@ -21,24 +21,13 @@ class Popup(QtWidgets.QMainWindow):
         self.setFixedSize(800, 370)
         self.setWindowTitle("URS: Uren aanpassen voor " + datum)
         self.setWindowIcon(QtGui.QIcon('images\icon.png'))
+        self.no_new = no_new
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setGeometry(QtCore.QRect(10, 10, 765, 600))
         self.tableWidget = Edit_table(self.centralwidget, 'activiteit', {
-                                      'starttijd': 'editable', 'uren': 'editable', 'activiteiten_id': 'editable', 'opmerking': 'editable', 'werkdag_id': werkdag_id}, user, specifier="WHERE werkdag_id =" + werkdag_id + ";", no_new)
+                                      'starttijd': 'editable', 'uren': 'editable', 'activiteiten_id': 'editable', 'opmerking': 'editable', 'werkdag_id': werkdag_id}, user, specifier="WHERE werkdag_id =" + werkdag_id + ";", no_new=self.no_new)
         self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
         self.tableWidget.setObjectName("tableWidget")
-
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton.setText("Verwijderen")
-        self.pushButton.clicked.connect(self.tableWidget.delete_row)
-
-        self.pushButton2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
-        self.pushButton2.setObjectName("pushButton")
-        self.pushButton2.setText("Opslaan")
-        self.pushButton2.clicked.connect(self.tableWidget.save)
 
     # def save(self):
     # # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
@@ -82,15 +71,14 @@ class Werkdag(Edit_table):
         super().__init__(pushvar, tablename, columns, user, specifier, no_new)
         self.itemDoubleClicked.connect(self.dubbelklik)
         self.inlogdata = user
+        self.no_new = no_new
 
     def dubbelklik(self, item):
-        items = [self.item(self.currentRow(), i)
-                 for i in range(self.columnCount())]
-        item_row_data = {self.columnnames[item.column(
-        )]: None if item is None else item.text() for item in items}
+        item_row_data = self.get_row_data(item.row())
 
         if item_row_data['dag_id'] != '*':
-            self.newscreen = Popup(item_row_data['dag_id'], item_row_data['datum'], self.inlogdata)
+            self.newscreen = Popup(
+                item_row_data['dag_id'], item_row_data['datum'], self.inlogdata, no_new=self.no_new)
             self.newscreen.show()
 
 
@@ -105,18 +93,6 @@ class Werkdagen_popup(QtWidgets.QMainWindow):
         self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
         self.tableWidget.setObjectName("tableWidget")
 
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton.setText("Delete")
-        self.pushButton.clicked.connect(self.tableWidget.delete_row)
-
-        self.pushButton2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
-        self.pushButton2.setObjectName("pushButton")
-        self.pushButton2.setText("Opslaan")
-        self.pushButton2.clicked.connect(self.tableWidget.save)
-
 
 class Medewerker_overzicht(Edit_table):
     def __init__(self, pushvar, tablename, columns, user, specifier=None, no_new=False):
@@ -125,10 +101,7 @@ class Medewerker_overzicht(Edit_table):
         self.inlogdata = user
 
     def dubbelklik(self, item):
-        items = [self.item(self.currentRow(), i)
-                 for i in range(self.columnCount())]
-        item_row_data = {self.columnnames[item.column(
-        )]: None if item is None else item.text() for item in items}
+        item_row_data = self.get_row_data(item.row())
 
         if item_row_data['medewerker_id'] != '*':
             self.newscreen = Werkdagen_popup(item_row_data['medewerker_id'], self.inlogdata)
@@ -139,6 +112,7 @@ class Ui_MainWindow(object):
     def __init__(self, inlogdata):
         super().__init__()
         self.inlogdata = inlogdata
+        self.buttons = []
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -163,18 +137,6 @@ class Ui_MainWindow(object):
         self.tableWidget2.setGeometry(QtCore.QRect(10, 10, 765, 300))
         self.tableWidget2.setObjectName("tableWidget2")
 
-        self.pushButton2 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton2.setGeometry(QtCore.QRect(10, 320, 81, 23))
-        self.pushButton2.setObjectName("pushButton")
-        self.pushButton2.setText("Verwijderen")
-        self.pushButton2.clicked.connect(self.tableWidget2.delete_row)
-
-        self.pushButton3 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton3.setGeometry(QtCore.QRect(101, 320, 81, 23))
-        self.pushButton3.setObjectName("pushButton")
-        self.pushButton3.setText("Opslaan")
-        self.pushButton3.clicked.connect(self.tableWidget2.save)
-
         # manager only functies
         if self.inlogdata['manager_id'] is None:
             # activiteiten aanpassen
@@ -185,19 +147,6 @@ class Ui_MainWindow(object):
                                           'activiteitnaam': 'editable', 'omschrijving': 'editable'}, self.inlogdata)
             self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
             self.tableWidget.setObjectName("tableWidget")
-
-            self.pushButton = QtWidgets.QPushButton(self.tab)
-            self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
-            self.pushButton.setObjectName("pushButton")
-            self.pushButton.setText("Verwijderen")
-            self.pushButton.clicked.connect(self.tableWidget.delete_row)
-
-            self.pushButton4 = QtWidgets.QPushButton(self.tab)
-            self.pushButton4.setGeometry(QtCore.QRect(101, 320, 81, 23))
-            self.pushButton4.setObjectName("pushButton")
-            self.pushButton4.setText("Opslaan")
-            # self.pushButton4.clicked.connect(self.activiteiten_save())
-            self.pushButton4.clicked.connect(self.tableWidget.save)
 
             # uren goedkeuren
             self.tab_3 = QtWidgets.QWidget()
@@ -217,19 +166,6 @@ class Ui_MainWindow(object):
             #     'functie_id': 'editable', 'activiteiten_id': 'editable'}, self.inlogdata)
             # self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
             # self.tableWidget.setObjectName("tableWidget")
-            #
-            # self.pushButton = QtWidgets.QPushButton(self.tab)
-            # self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
-            # self.pushButton.setObjectName("pushButton")
-            # self.pushButton.setText("Verwijderen")
-            # self.pushButton.clicked.connect(self.tableWidget.delete_row)
-            #
-            # self.pushButton4 = QtWidgets.QPushButton(self.tab)
-            # self.pushButton4.setGeometry(QtCore.QRect(101, 320, 81, 23))
-            # self.pushButton4.setObjectName("pushButton")
-            # self.pushButton4.setText("Opslaan")
-            # #self.pushButton4.clicked.connect(self.rechten_save())
-            # self.pushButton4.clicked.connect(self.tableWidget2.save)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
