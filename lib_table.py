@@ -24,6 +24,18 @@ class Edit_table(QtWidgets.QTableWidget):
             self.setHorizontalHeaderItem(index, QtWidgets.QTableWidgetItem(name))
         self.itemChanged.connect(self.new_data)
 
+        self.pushButton = QtWidgets.QPushButton(pushvar)
+        self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton.setText("Verwijderen")
+        self.pushButton.clicked.connect(self.delete_row)
+
+        self.pushButton2 = QtWidgets.QPushButton(pushvar)
+        self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
+        self.pushButton2.setObjectName("pushButton")
+        self.pushButton2.setText("Opslaan")
+        self.pushButton2.clicked.connect(self.save)
+
         # Roept de "load_data()" functie aan om zo data op te halen uit de database server.
         self.load_data()
 
@@ -98,7 +110,6 @@ class Edit_table(QtWidgets.QTableWidget):
                     # Voeg aan het changelog een nieuwe entry toe.
                     self.changelog.append(
                         {'type': 'toevoeging', 'table': self.tablename, 'data': item_row_data})
-                    print('lez go boiz')
                     # Vul de tabel met de gegevens.
                     self.build_table()
             else:
@@ -128,42 +139,43 @@ class Edit_table(QtWidgets.QTableWidget):
 
     def delete_row(self):
         # Deze functie verwijderd een rij.
+        # zet de delete knop uit wanneer er geen toevoegingen gemaakt mogen worden
+        if not self.no_new:
+            # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
+            self.disabled = True
 
-        # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
-        self.disabled = True
+            # Controleerd of er wel een rij is geselecteerd die bestaat. Dit kan mis gaan.
+            if self.currentRow() >= 0 and self.currentRow() < self.rowCount() - 1:
 
-        # Controleerd of er wel een rij is geselecteerd die bestaat. Dit kan mis gaan.
-        if self.currentRow() >= 0 and self.currentRow() < self.rowCount() - 1:
+                # Verwijder de huidige rij uit de "data"-list.
+                self.data.pop(self.currentRow())
 
-            # Verwijder de huidige rij uit de "data"-list.
-            self.data.pop(self.currentRow())
+                item_row_data = self.get_row_data(self.currentRow())
 
-            item_row_data = self.get_row_data(self.currentRow())
+                # Indien de waarde uit "item_row_data" gelijk is aan een "*":
+                if item_row_data[self.tablename + '_id'] == '*':
 
-            # Indien de waarde uit "item_row_data" gelijk is aan een "*":
-            if item_row_data[self.tablename + '_id'] == '*':
+                    # Voor iedere rij in "changelog":
+                    for index, change in enumerate(self.changelog):
 
-                # Voor iedere rij in "changelog":
-                for index, change in enumerate(self.changelog):
+                        # Indien de huidige waarde van "data" overeenkomt met "item_row_data".
+                        if change['data'] == item_row_data:
+                            # Verwijder de "changelog"-entry van de huidige index.
+                            self.changelog.pop(index)
+                            break
+                else:
+                    # Voeg aan het changelog een nieuwe entry toe.
+                    self.changelog.append(
+                        {'type': 'verwijdering', 'table': self.tablename, 'data': item_row_data})
 
-                    # Indien de huidige waarde van "data" overeenkomt met "item_row_data".
-                    if change['data'] == item_row_data:
-                        # Verwijder de "changelog"-entry van de huidige index.
-                        self.changelog.pop(index)
-                        break
-            else:
-                # Voeg aan het changelog een nieuwe entry toe.
-                self.changelog.append(
-                    {'type': 'verwijdering', 'table': self.tablename, 'data': item_row_data})
+                # Verwijder de laatst toegevoegde waarde in de "data"-list.
+                self.data.pop()
 
-            # Verwijder de laatst toegevoegde waarde in de "data"-list.
-            self.data.pop()
+                # Roep de "build_table"-functie aan om de aanpassing door te voeren naar de tabel.
+                self.build_table()
 
-            # Roep de "build_table"-functie aan om de aanpassing door te voeren naar de tabel.
-            self.build_table()
-
-        # Laat andere functies weer gebruik maken van de tabel.
-        self.disabled = False
+            # Laat andere functies weer gebruik maken van de tabel.
+            self.disabled = False
 
     def save(self):
         # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
