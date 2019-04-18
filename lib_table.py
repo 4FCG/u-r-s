@@ -7,9 +7,10 @@ from lib_database import rij_verwijder
 
 
 class Edit_table(QtWidgets.QTableWidget):
-    def __init__(self, pushvar, tablename, columns, user, specifier=None):
+    def __init__(self, pushvar, tablename, columns, user, specifier=None, no_new=False):
         # Deze functie tekent het venster.
         super().__init__(pushvar)
+        self.no_new = no_new
         self.specifier = specifier
         self.tablename = tablename.lower()
         columns[(self.tablename + '_id')] = 'locked'
@@ -34,17 +35,18 @@ class Edit_table(QtWidgets.QTableWidget):
         self.data = get_data(self.tablename.upper(), self.specifier)
 
     def build_table(self):
-    # Deze functie vult de tabel met de opgehaalde data.
+        # Deze functie vult de tabel met de opgehaalde data.
 
         # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
         self.disabled = True
 
         # Zet het aantal rijen dat getekend moet worden op de lengte van de data met daarbij een 1 opgeteld.
-        self.setRowCount(len(self.data) + 1)
-
-        #
-        self.data.append({name: '*' if self.columns[name] !=
-                          'editable' else None for name in self.columnnames})
+        if self.no_new:
+            self.setRowCount(len(self.data))
+        else:
+            self.setRowCount(len(self.data) + 1)
+            self.data.append({name: '*' if self.columns[name] !=
+                              'editable' else None for name in self.columnnames})
 
         # Voer uit voor iedere rij:
         for row_index, row in enumerate(self.data):
@@ -78,7 +80,7 @@ class Edit_table(QtWidgets.QTableWidget):
         self.disabled = False
 
     def new_data(self, item):
-    # Deze functie zorgt er voor dat de wijzigingen in de tabel worden geregistreerd.
+        # Deze functie zorgt er voor dat de wijzigingen in de tabel worden geregistreerd.
         if not self.disabled:
             # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
             self.disabled = True
@@ -90,7 +92,7 @@ class Edit_table(QtWidgets.QTableWidget):
             )]: None if item is None else item.text() for item in items}
 
             # Indien de huidige rij ook de laatste rij is.
-            if item.row() == self.rowCount() - 1:
+            if item.row() == self.rowCount() - 1 and not self.no_new:
                 # Indien de rij niet leeg is.
                 if '' not in item_row_data.values():
                     # Voeg in een nieuwe rij van "data" de gegevens van "item_row_data".
@@ -99,7 +101,7 @@ class Edit_table(QtWidgets.QTableWidget):
                     # Voeg aan het changelog een nieuwe entry toe.
                     self.changelog.append(
                         {'type': 'toevoeging', 'table': self.tablename, 'data': item_row_data})
-
+                    print('lez go boiz')
                     # Vul de tabel met de gegevens.
                     self.build_table()
             else:
@@ -128,7 +130,7 @@ class Edit_table(QtWidgets.QTableWidget):
             self.disabled = False
 
     def delete_row(self):
-    # Deze functie verwijderd een rij.
+        # Deze functie verwijderd een rij.
 
         # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
         self.disabled = True
@@ -173,9 +175,9 @@ class Edit_table(QtWidgets.QTableWidget):
         self.disabled = False
 
     def save(self):
-    # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-        live = 1
-
+        # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
+        live = 0
+        print(self.changelog)
         for row in self.changelog:
             if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
                 if live == 1:
@@ -187,13 +189,15 @@ class Edit_table(QtWidgets.QTableWidget):
 
             elif row['type'] == "toevoeging":
                 if live == 1:
-                    rij_toevoegen("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                    rij_toevoegen("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (
+                        row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
                 else:
                     print("Toevoegen!")
 
             elif row['type'] == "verandering":
                 if live == 1:
-                    rij_bijwerken("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
+                    rij_bijwerken("DAG", ("datum", "medewerker_id", "thuisofkantoor", "starttijd", "eindtijd"), (
+                        row['data']['datum'], row['data']['medewerker_id'], row['data']['thuisofkantoor'], row['data']['starttijd'], row['data']['eindtijd']))
                 else:
                     print("Bijwerken!")
 
