@@ -125,7 +125,7 @@ class Edit_table(QtWidgets.QTableWidget):
                 # Controleer of de gewijzigde waarde afkomstig is uit de "thuisofkantoor"-kolom.
                 elif item.column() == 1:
                     # Check thuis of kantoor
-                    if item_row_data['thuisofkantoor'] == 1 or item_row_data['thuisofkantoor'] == 0:
+                    if item_row_data['thuisofkantoor'] != '0' and item_row_data['thuisofkantoor'] != '1':
                         error("Incorrecte invoer", "De 'thuis of kantoor'-keuze is niet correct ingevoerd", "Vult u hier alstublieft een 0 in als u thuis heeft gewerkt en een 1 als u op kantoor heeft gewerkt.")
                         item.setText("")
 
