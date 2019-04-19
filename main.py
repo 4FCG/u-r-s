@@ -8,8 +8,8 @@ import sys
 try:
     from PyQt5 import QtCore, QtGui, QtWidgets
 except ImportError:
-    log('MODULES', "[!] Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'")
-    exit())
+    print(log('MODULES', "[!] Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
+    exit()
 
 class Loginscherm(widget_login.Ui_MainWindow):
     def __init__(self):
