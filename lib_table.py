@@ -23,17 +23,19 @@ class Edit_table(QtWidgets.QTableWidget):
             self.setHorizontalHeaderItem(index, QtWidgets.QTableWidgetItem(name))
         self.itemChanged.connect(self.new_data)
 
+        # aanmaken verwijder knop
         self.pushButton = QtWidgets.QPushButton(pushvar)
         self.pushButton.setGeometry(QtCore.QRect(10, 320, 81, 23))
         self.pushButton.setObjectName("pushButton")
         self.pushButton.setText("Verwijderen")
         self.pushButton.clicked.connect(self.delete_row)
 
+        # aanmaken opslaan knop
         self.pushButton2 = QtWidgets.QPushButton(pushvar)
         self.pushButton2.setGeometry(QtCore.QRect(101, 320, 81, 23))
         self.pushButton2.setObjectName("pushButton")
         self.pushButton2.setText("Opslaan")
-        self.pushButton2.clicked.connect(self.save)
+        self.pushButton2.clicked.connect(self.messagebox)
 
         # Roept de "load_data()" functie aan om zo data op te halen uit de database server.
         self.load_data()
@@ -96,7 +98,6 @@ class Edit_table(QtWidgets.QTableWidget):
             # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
             self.disabled = True
 
-            # this is done twice, function?
             item_row_data = self.get_row_data(item.row())
 
             # Indien de huidige rij ook de laatste rij is.
@@ -175,6 +176,16 @@ class Edit_table(QtWidgets.QTableWidget):
 
             # Laat andere functies weer gebruik maken van de tabel.
             self.disabled = False
+
+    def messagebox(self):
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+        msgbox.setText("Weet u zeker dat u deze wijzigingen wilt doorvoeren?")
+        msgbox.setWindowTitle("Waarschuwing")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        msgbox.exec_()
+        if msgbox.clickedButton().text() == 'OK':
+            self.save()
 
     def save(self):
         wijzigingen_doorvoeren(self.changelog)

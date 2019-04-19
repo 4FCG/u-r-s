@@ -1,7 +1,13 @@
 import config
 import datetime
+from os import mkdir
 
 
 def log(uitvoerder, actie):
-    file = open(config.log['file'], 'a+')
-    file.write(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": '" + uitvoerder + "': " + actie + "\n"))
+    try:
+        mkdir(config.log['path'])
+    except FileExistsError:
+        pass
+    with open(config.log['path'] + 'log.txt', 'a+') as file:
+        file.write(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +
+                       ": '" + uitvoerder + "': " + actie + "\n"))
