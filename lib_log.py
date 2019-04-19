@@ -9,5 +9,7 @@ def log(uitvoerder, actie):
     except FileExistsError:
         pass
     with open(config.log['path'] + 'log.txt', 'a+') as file:
-        file.write(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +
-                       ": '" + uitvoerder + "': " + actie + "\n"))
+        melding = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +
+                      ": '" + uitvoerder + "': " + actie + "\n")
+        file.write(melding)
+        return melding

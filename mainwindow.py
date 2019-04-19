@@ -6,7 +6,12 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt5 import QtCore, QtGui, QtWidgets
+except ImportError:
+    print(log('MODULES', "[!] Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
+    exit()
+
 from lib_table import Edit_table
 
 class Popup(QtWidgets.QMainWindow):

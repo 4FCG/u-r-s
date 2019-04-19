@@ -2,20 +2,14 @@ import widget_login
 import mainwindow
 import lib_database
 from lib_log import log
+from lib_error import error
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
 
-def foutmelding(title, text, informativetext):
-    msg = QMessageBox()
-    msg.setIcon(QMessageBox.Warning)
-
-    msg.setText(text)
-    msg.setInformativeText(informativetext)
-    msg.setWindowTitle(title)
-    msg.setStandardButtons(QMessageBox.Ok)
-    msg.exec_()
-
+try:
+    from PyQt5 import QtCore, QtGui, QtWidgets
+except ImportError:
+    print(log('MODULES', "[!] Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
+    exit()
 
 class Loginscherm(widget_login.Ui_MainWindow):
     def __init__(self):
@@ -31,7 +25,7 @@ class Loginscherm(widget_login.Ui_MainWindow):
             mainscreen = mainwindow.Ui_MainWindow(loginresult)
             mainscreen.setupUi(MainWindow)
         else:
-            foutmelding("Incorrecte inloggegevens", "Een van de inloggegevens is incorrect!",
+            error("Incorrecte inloggegevens", "Een van de inloggegevens is incorrect!",
                         "Controleert u alstublieft of alle ingevoerde gegevens correct zijn. Neem anders contact op met het ICT-servicedesk.")
 
 app = QtWidgets.QApplication(sys.argv)

@@ -1,4 +1,9 @@
-from PyQt5 import QtCore, QtWidgets
+try:
+    from PyQt5 import QtCore, QtGui, QtWidgets
+except ImportError:
+    print(log('MODULES', "[!] Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
+    exit()
+
 from lib_database import get_data
 from lib_database import wijzigingen_doorvoeren
 # columns: {'columnname': locked/editable}
