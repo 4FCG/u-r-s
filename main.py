@@ -1,10 +1,10 @@
 import widget_login
 import mainwindow
 import lib_database
+from lib_log import log
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-
 
 def foutmelding(title, text, informativetext):
     msg = QMessageBox()
@@ -24,6 +24,7 @@ class Loginscherm(widget_login.Ui_MainWindow):
         self.pushButton.clicked.connect(self.login)
 
     def login(self):
+        log("ALGEMEEN", "[+] Succesvol opgestart!")
         loginresult = lib_database.login(self.lineEdit.text(
         ), self.lineEdit_2.text(), self.lineEdit_3.text())
         if loginresult:
@@ -32,7 +33,6 @@ class Loginscherm(widget_login.Ui_MainWindow):
         else:
             foutmelding("Incorrecte inloggegevens", "Een van de inloggegevens is incorrect!",
                         "Controleert u alstublieft of alle ingevoerde gegevens correct zijn. Neem anders contact op met het ICT-servicedesk.")
-
 
 app = QtWidgets.QApplication(sys.argv)
 MainWindow = QtWidgets.QMainWindow()

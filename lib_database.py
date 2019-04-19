@@ -1,5 +1,7 @@
 import mysql.connector
 import config
+from lib_log import log
+
 from lib_password import hash_password, verify_password
 
 database = mysql.connector.connect(
@@ -18,6 +20,7 @@ def add_user(voornaam, achternaam, wachtwoord, functie_id, type_medewerker, mag_
                   mag_thuis, woonafstand, contracturen, uurtarief, manager_id)
     cursor.execute(query, parameters)
     database.commit()
+    log('GEBRUIKERSREGISTRATIE', "Succesvolle registratie voor: " + voornaam + " " + achternaam)
 
 
 def login(voornaam, achternaam, wachtwoord):
@@ -28,9 +31,10 @@ def login(voornaam, achternaam, wachtwoord):
     columns = list(cursor)
     for row in values:
         if verify_password(row[3], wachtwoord):
+            log('LOGIN', "Succesvolle aanmelding voor: " + voornaam + " " + achternaam)
             return {columns[index][0]: value for index, value in enumerate(row)}
+    log('LOGIN', "Foutieve aanmelding voor: " + voornaam + " " + achternaam)
     return False
-
 
 def get_data(tablename, specifier):
     cursor.execute("SELECT * FROM " + tablename + " " +
@@ -47,9 +51,10 @@ def get_data(tablename, specifier):
 
 def wijzigingen_doorvoeren(changelog):
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
+        print(changelog)
         live = 1
         for row in changelog:
-            tabel = row['table']
+            tabel = str(row['table']).upper()
             # De primaire sleutel zit altijd in een kolom met als naam de naam van de tabel met daarachter "_id".
             primaire_sleutel = str(tabel.lower() + "_id")
             if row['type'] == 'toevoeging':
@@ -59,66 +64,49 @@ def wijzigingen_doorvoeren(changelog):
 
             if row['type'] == "verwijdering":
                 if live == 1:
-                    query_variabelen = []
-                    query_variabelen += tabel, primaire_sleutel, row['data'][primaire_sleutel]
-                    cursor.execute("DELETE FROM %s WHERE `%s` = %s;", query_variabelen)
+                    cursor.execute("DELETE FROM " + tabel + " WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";")
+                    log('OPSLAAN', "Rij " + row['data'][primaire_sleutel] + " is succesvol verwijderd uit tabel " + tabel)
 
                     # Speciale uitzondering voor de "DAG" tabel: Wanneer een dag verwijderd word dient ook de activiteiten van deze tabel verwijderd te worden.
                     if tabel == "DAG":
-                        query_variabelen = []
-                        query_variabelen += "ACTIVITEIT", "werkdag_id", row['data']['dag_id']
-                        cursor.execute("DELETE FROM %s WHERE `%s` = %s;", query_variabelen)
+                        cursor.execute("DELETE FROM ACTIVITEITEN WHERE 'werkdag_id' " + " = " + row['data']['dag_id'] + ";")
+                        log('OPSLAAN', "[-] Rij " + row['data']['dag_id'] + " is succesvol verwijderd uit tabel ACTIVITEITEN.")
+                    database.commit()
 
                 else:
                     print("Verwijderen!")
 
             elif row['type'] == "toevoeging":
                 if live == 1:
-                    query_pre = "INSERT INTO `%s` ("
-                    query_middel = ") VALUES ("
-                    query_post = ")"
+                    query = "INSERT INTO " + tabel + " ("
                     for kolom in kolommen:
-                        query_pre += "`%s`, "
-
+                        query += "`" + kolom + "`, "
+                    query = query[:-2]
+                    query += ") VALUES ("
                     for waarde in waarden:
-                        query_middel += "%s, "
-
-                    query_waarden = [tabel]
-                    for kolom in kolommen:
-                        query_waarden.append(kolom)
-                    for waarde in waarden:
-                        query_waarden.append(waarde)
-
-                    query = query_pre[:-2] + query_middel[:-2] + query_post
-                    print("Bijwerking, Query:" + query)
-                    print("Bijwerking, Query waarden:" + str(query_waarden))
-
-                    cursor.execute(query, query_waarden)
+                        query += "'" + waarde + "', "
+                    query = query[:-2]
+                    query += ");"
+                    cursor.execute(query)
+                    log('OPSLAAN', "[+] Rij " + str(cursor.lastrowid) + " is succesvol toegevoegd aan tabel " + tabel)
+                    database.commit()
 
                 else:
                     print("Toevoegen!")
 
             elif row['type'] == "verandering":
                 if live == 1:
-                    query_pre = "UPDATE %s ("
-                    query_middel = ") VALUES ("
-                    query_post = ")"
+                    query = "UPDATE " + tabel + " ("
                     for kolom in kolommen:
-                        query_pre += "`%s`, "
-
+                        query += "`" + kolom + "`, "
+                    query = query[:-2]
+                    query += ") VALUES ("
                     for waarde in waarden:
-                        query_middel += "%s, "
-
-                    query_waarden = [tabel]
-                    for kolom in kolommen:
-                        query_waarden.append(kolom)
-                    for waarde in waarden:
-                        query_waarden.append(waarde)
-
-                    query = query_pre[:-2] + query_middel[:-2] + query_post
-                    print("Verandering, Query: " + query)
-                    print("Verandering, Query waarden: " + str(query_waarden))
-
-                    cursor.execute(query, query_waarden)
+                        query += "'" + waarde + "', "
+                    query = query[:-2]
+                    query += ") WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";"
+                    cursor.execute(query)
+                    log('OPSLAAN', "[|] Rij " + str(cursor.lastrowid) + " is succesvol aangepast in tabel " + tabel)
+                    database.commit()
                 else:
                     print("Bijwerken!")

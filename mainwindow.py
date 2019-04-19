@@ -81,7 +81,9 @@ class Werkdag(Edit_table):
 class Werkdagen_popup(QtWidgets.QMainWindow):
     def __init__(self, medewerker_id, user):
         super().__init__()
-        self.resize(800, 600)
+        self.setFixedSize(600, 600)
+        self.setWindowTitle("URS: Dagen aanpassen")
+        self.setWindowTitle("URS: Dagen aanpassen")
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setGeometry(QtCore.QRect(10, 10, 765, 600))
         self.tableWidget = Werkdag(self.centralwidget, 'dag', {
@@ -135,15 +137,6 @@ class Ui_MainWindow(object):
 
         # manager only functies
         if self.inlogdata['manager_id'] is None:
-            # activiteiten aanpassen
-            self.tabWidget.addTab(self.tab, "")
-            self.tabWidget.setTabText(self.tabWidget.indexOf(
-                self.tab), "Activiteiten")
-            self.tableWidget = Edit_table(self.tab, 'activiteiten', {
-                                          'activiteitnaam': 'editable', 'omschrijving': 'editable'}, self.inlogdata)
-            self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
-            self.tableWidget.setObjectName("tableWidget")
-
             # uren goedkeuren
             self.tab_3 = QtWidgets.QWidget()
             self.tab_3.setObjectName("tab_3")
@@ -162,6 +155,15 @@ class Ui_MainWindow(object):
             #     'functie_id': 'editable', 'activiteiten_id': 'editable'}, self.inlogdata)
             # self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
             # self.tableWidget.setObjectName("tableWidget")
+
+            # activiteiten aanpassen
+            self.tabWidget.addTab(self.tab, "")
+            self.tabWidget.setTabText(self.tabWidget.indexOf(
+                self.tab), "Activiteiten")
+            self.tableWidget = Edit_table(self.tab, 'activiteiten', {
+                                          'activiteitnaam': 'editable', 'omschrijving': 'editable'}, self.inlogdata)
+            self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
+            self.tableWidget.setObjectName("tableWidget")
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
