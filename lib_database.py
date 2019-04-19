@@ -1,15 +1,31 @@
-import mysql.connector
-import config
+from lib_log import log
+
+try:
+    import mysql.connector
+except ImportError:
+    log('MODULES', "[!] Missende module: Python-module 'mysql.connector' is vereist voor dit programma. Installeert u alstublieft de 'mysql.connector'-module met het commando: 'pip install mysql.connector'")
+    exit()
+
+try:
+    import config
+except ImportError:
+    log('CONFIGURATIE', "[!] Configuratiebestand mist: Het configuratie bestand 'config.py' is vereist voor dit programma. Er zal een nieuw configuratie bestand aangemaakt worden.")
+    exit()
+
 from lib_log import log
 
 from lib_password import hash_password, verify_password
 
-database = mysql.connector.connect(
-    host=config.mysql['host'],
-    user=config.mysql['user'],
-    passwd=config.mysql['passwd'],
-    database=config.mysql['database']
-)
+try:
+    database = mysql.connector.connect(
+        host=config.mysql['host'],
+        user=config.mysql['user'],
+        passwd=config.mysql['passwd'],
+        database=config.mysql['database']
+    )
+except mysql.connector.Error as err:
+    log('DATABASE', "[!] Aanmelden bij databaseserver niet gelukt: {}".format(err))
+    exit()
 
 cursor = database.cursor()
 
@@ -46,7 +62,6 @@ def get_data(tablename, specifier):
     for row in values:
         data.append({column[0]: row[index] for index, column in enumerate(columns)})
     return data
-#add_user('John', 'Depper', 'TheJohn', 2, 1, 1, 40.5, 36, 16.50, None)
 
 
 def wijzigingen_doorvoeren(changelog):
