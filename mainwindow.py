@@ -6,10 +6,12 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+# Probeer om de "PyQt5"-module te importeren.
 try:
     from PyQt5 import QtCore, QtGui, QtWidgets
 except ImportError:
-    print(log('MODULES', "[!] Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
+    # Plaats een melding in het logbestand en toon deze in de CLI.
+    print(log('MODULES', "Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
     exit()
 
 from lib_table import Edit_table

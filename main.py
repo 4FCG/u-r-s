@@ -5,10 +5,12 @@ from lib_log import log
 from lib_error import error
 import sys
 
+# Probeer om de "PyQt5"-module te importeren.
 try:
     from PyQt5 import QtCore, QtGui, QtWidgets
 except ImportError:
-    print(log('MODULES', "[!] Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
+    # Plaats een melding in het logbestand en toon deze in de CLI.
+    print(log('MODULES', "Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
     exit()
 
 class Loginscherm(widget_login.Ui_MainWindow):

@@ -1,21 +1,23 @@
 from lib_log import log
+from lib_password import hash_password, verify_password
 
+# Probeer om de "mysql.connector"-module te importeren.
 try:
     import mysql.connector
 except ImportError:
+    # Plaats een melding in het logbestand en toon deze in de CLI.
     print(log('MODULES', "[!] Missende module: Python-module 'mysql.connector' is vereist voor dit programma. Installeert u alstublieft de 'mysql.connector'-module met het commando: 'pip install mysql.connector'"))
     exit()
 
+# Probeer om het "config.py"-bestand te importeren.
 try:
     import config
 except ImportError:
+    # Plaats een melding in het logbestand en toon deze in de CLI.
     print(log('CONFIGURATIE', "[!] Configuratiebestand mist: Het configuratie bestand 'config.py' is vereist voor dit programma. Er zal een nieuw configuratie bestand aangemaakt worden."))
     exit()
 
-from lib_log import log
-
-from lib_password import hash_password, verify_password
-
+# Probeer verbinding te maken met de MySQL-database.
 try:
     database = mysql.connector.connect(
         host=config.mysql['host'],
@@ -24,6 +26,7 @@ try:
         database=config.mysql['database']
     )
 except mysql.connector.Error as err:
+    # Plaats een melding in het logbestand en toon deze in de CLI.
     log('DATABASE', "[!] Aanmelden bij databaseserver niet gelukt: {}".format(err))
     exit()
 
@@ -31,11 +34,22 @@ cursor = database.cursor()
 
 
 def add_user(voornaam, achternaam, wachtwoord, functie_id, type_medewerker, mag_thuis, woonafstand, contracturen, uurtarief, manager_id):
+    # Voegt een gebruiker toe aan het programma.
+
+    # Bouw de query.
     query = "INSERT INTO `medewerker` (voornaam, achternaam, wachtwoord, functie_id, type_medewerker, mag_thuis, woonafstand, contracturen, uurtarief, manager_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+    # Stel de parameters samen.
     parameters = (voornaam, achternaam, hash_password(wachtwoord), functie_id, type_medewerker,
                   mag_thuis, woonafstand, contracturen, uurtarief, manager_id)
+
+    # Laat de parameters in de query zetten en voer de query uit.
     cursor.execute(query, parameters)
+
+    # Maak de toevoeging definitief.
     database.commit()
+
+    # Plaats een melding in het logbestand.
     log('GEBRUIKERSREGISTRATIE', "Succesvolle registratie voor: " + voornaam + " " + achternaam)
 
 
