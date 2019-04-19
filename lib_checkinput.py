@@ -31,5 +31,3 @@ def check_time(string):
     except ValueError:
         # Als het niet lukt return dan "False".
         return False
-
-print(check_time("25:22:22"))

@@ -111,37 +111,54 @@ class Edit_table(QtWidgets.QTableWidget):
 
             item_row_data = self.get_row_data(item.row())
             # Variabelen controle:
-            if self.tablename == "dag":
-                # Check de datum.
-                if item.column() == 0:
-                    if check_date(str(item_row_data['datum'])):
-                        ("Incorrecte invoer", "De datum is niet correct ingevoerd", "Controleert u alstublieft of de datums zijn ingevoerd met dit formaat: JJJJ-MM-DD, bijvoorbeeld: 1998-10-10.")
 
-                # Check thuis of kantoor
+            # Controleer of de huidige tabel de 'dag'-tabel is.
+            if self.tablename == "dag":
+
+                # Controleer of de gewijzigde waarde afkomstig is uit de "datum"-kolom.
+                if item.column() == 0:
+                    # Check de datum.
+                    if check_date(str(item_row_data['datum'])) != True:
+                        error("Incorrecte invoer", "De datum is niet correct ingevoerd", "Controleert u alstublieft of de datums zijn ingevoerd met dit formaat: JJJJ-MM-DD, bijvoorbeeld: 1998-10-10.")
+                        item.setText("")
+
+                # Controleer of de gewijzigde waarde afkomstig is uit de "thuisofkantoor"-kolom.
                 elif item.column() == 1:
+                    # Check thuis of kantoor
                     if item_row_data['thuisofkantoor'] == 1 or item_row_data['thuisofkantoor'] == 0:
                         error("Incorrecte invoer", "De 'thuis of kantoor'-keuze is niet correct ingevoerd", "Vult u hier alstublieft een 0 in als u thuis heeft gewerkt en een 1 als u op kantoor heeft gewerkt.")
+                        item.setText("")
 
-                # Check de starttijd.
+                # Controleer of de gewijzigde waarde afkomstig is uit de "starttijd"-kolom.
                 elif item.column() == 2:
+                    # Check de starttijd.
                     if check_time(item_row_data['starttijd']) != True:
                         error("Incorrecte invoer", "De starttijd is niet correct ingevoerd", "Controleert u alstublieft of de starttijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 09:22:23.")
+                        item.setText("")
 
-                # Check de eindtijd.
+                # Controleer of de gewijzigde waarde afkomstig is uit de "eindtijd"-kolom.
                 elif item.column() == 3:
+                    # Check de eindtijd.
                     if check_time(item_row_data['eindtijd']) != True:
                         error("Incorrecte invoer", "De eindtijd is niet correct ingevoerd", "Controleert u alstublieft of de eindtijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 17:22:23.")
+                        item.setText("")
 
+            # Controleer of de huidige tabel de 'activiteit'-tabel is.
             if self.tablename == "activiteit":
-                # Check de starttijd.
+                # Controleer of de gewijzigde waarde afkomstig is uit de "starttijd"-kolom.
+
                 if item.column() == 0:
+                    # Check de starttijd.
                     if check_time(str(item_row_data['starttijd'])):
                         error("Incorrecte invoer", "De starttijd is niet correct ingevoerd", "Controleert u alstublieft of de starttijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 09:22:23.")
+                        item.setText("")
 
-                # Check de eindtijd.
+                # Controleer of de gewijzigde waarde afkomstig is uit de "eindtijd"-kolom.
                 if item.column() == 1:
+                    # Check de eindtijd.
                     if check_time(str(item_row_data['eindtijd'])):
                         error("Incorrecte invoer", "De eindtijd is niet correct ingevoerd", "Controleert u alstublieft of de eindtijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 17:22:23.")
+                        item.setText("")
 
             # Indien de huidige rij ook de laatste rij is.
             if item.row() == self.rowCount() - 1 and not self.no_new:
