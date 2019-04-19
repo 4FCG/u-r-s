@@ -8,6 +8,10 @@ except ImportError:
 
 from lib_database import get_data
 from lib_database import wijzigingen_doorvoeren
+from lib_checkinput import check_date
+from lib_checkinput import check_time
+from lib_error import error
+
 # columns: {'columnname': locked/editable}
 # change mysql table to name every tables primary key tablename_id
 
@@ -106,6 +110,38 @@ class Edit_table(QtWidgets.QTableWidget):
             self.disabled = True
 
             item_row_data = self.get_row_data(item.row())
+            # Variabelen controle:
+            if self.tablename == "dag":
+                # Check de datum.
+                if item.column() == 0:
+                    if check_date(str(item_row_data['datum'])):
+                        ("Incorrecte invoer", "De datum is niet correct ingevoerd", "Controleert u alstublieft of de datums zijn ingevoerd met dit formaat: JJJJ-MM-DD, bijvoorbeeld: 1998-10-10.")
+
+                # Check thuis of kantoor
+                elif item.column() == 1:
+                    if item_row_data['thuisofkantoor'] == 1 or item_row_data['thuisofkantoor'] == 0:
+                        error("Incorrecte invoer", "De 'thuis of kantoor'-keuze is niet correct ingevoerd", "Vult u hier alstublieft een 0 in als u thuis heeft gewerkt en een 1 als u op kantoor heeft gewerkt.")
+
+                # Check de starttijd.
+                elif item.column() == 2:
+                    if check_time(item_row_data['starttijd']) != True:
+                        error("Incorrecte invoer", "De starttijd is niet correct ingevoerd", "Controleert u alstublieft of de starttijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 09:22:23.")
+
+                # Check de eindtijd.
+                elif item.column() == 3:
+                    if check_time(item_row_data['eindtijd']) != True:
+                        error("Incorrecte invoer", "De eindtijd is niet correct ingevoerd", "Controleert u alstublieft of de eindtijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 17:22:23.")
+
+            if self.tablename == "activiteit":
+                # Check de starttijd.
+                if item.column() == 0:
+                    if check_time(str(item_row_data['starttijd'])):
+                        error("Incorrecte invoer", "De starttijd is niet correct ingevoerd", "Controleert u alstublieft of de starttijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 09:22:23.")
+
+                # Check de eindtijd.
+                if item.column() == 1:
+                    if check_time(str(item_row_data['eindtijd'])):
+                        error("Incorrecte invoer", "De eindtijd is niet correct ingevoerd", "Controleert u alstublieft of de eindtijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 17:22:23.")
 
             # Indien de huidige rij ook de laatste rij is.
             if item.row() == self.rowCount() - 1 and not self.no_new:

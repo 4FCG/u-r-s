@@ -1,7 +1,7 @@
 # Is benodigd om te controleren of datums en tijden volgens de juiste wijze zijn geformatteerd.
 import datetime
 
-def date(string):
+def check_date(string):
     # Controleert of de opgegeven string een juist geformatteerde datum is.
 
     # Stel een formaat op met: YYYY-MM-DD, bijvoorbeeld: 2019-04-19
@@ -17,7 +17,7 @@ def date(string):
         return False
 
 
-def time(string):
+def check_time(string):
     # Controleert of de opgegeven string een juist geformatteerde tijd is.
 
     # Stel een formaat op met: UU:MM:SS, bijvoorbeeld: 22:24:21
@@ -31,3 +31,5 @@ def time(string):
     except ValueError:
         # Als het niet lukt return dan "False".
         return False
+
+print(check_time("25:22:22"))

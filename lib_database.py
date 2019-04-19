@@ -80,7 +80,6 @@ def get_data(tablename, specifier):
 
 def wijzigingen_doorvoeren(changelog):
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-        print(changelog)
         live = 1
         for row in changelog:
             tabel = str(row['table']).upper()
@@ -125,15 +124,14 @@ def wijzigingen_doorvoeren(changelog):
 
             elif row['type'] == "verandering":
                 if live == 1:
-                    query = "UPDATE " + tabel + " ("
+                    query = "UPDATE " + tabel + " SET "
+
+                    huidige_waarde = 0
                     for kolom in kolommen:
-                        query += "`" + kolom + "`, "
+                        query += kolom + " = '" + waarden[huidige_waarde] + "', "
+                        huidige_waarde += 1
                     query = query[:-2]
-                    query += ") VALUES ("
-                    for waarde in waarden:
-                        query += "'" + waarde + "', "
-                    query = query[:-2]
-                    query += ") WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";"
+                    query += " WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";"
                     cursor.execute(query)
                     log('OPSLAAN', "[|] Rij " + str(cursor.lastrowid) + " is succesvol aangepast in tabel " + tabel)
                     database.commit()
