@@ -16,6 +16,7 @@ except ImportError:
 
 from lib_table import Edit_table
 
+
 class Popup(QtWidgets.QMainWindow):
     def __init__(self, werkdag_id, datum, user, no_new=False):
         super().__init__()

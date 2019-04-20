@@ -13,6 +13,7 @@ except ImportError:
     print(log('MODULES', "Missende module: Python-module 'PyQt5' is vereist voor dit programma. Installeert u alstublieft de 'PyQt5'-module met het commando: 'pip install PyQt5'"))
     exit()
 
+
 class Loginscherm(widget_login.Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -28,7 +29,8 @@ class Loginscherm(widget_login.Ui_MainWindow):
             mainscreen.setupUi(MainWindow)
         else:
             error("Incorrecte inloggegevens", "Een van de inloggegevens is incorrect!",
-                        "Controleert u alstublieft of alle ingevoerde gegevens correct zijn. Neem anders contact op met het ICT-servicedesk.")
+                  "Controleert u alstublieft of alle ingevoerde gegevens correct zijn. Neem anders contact op met het ICT-servicedesk.")
+
 
 app = QtWidgets.QApplication(sys.argv)
 MainWindow = QtWidgets.QMainWindow()
