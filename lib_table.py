@@ -65,9 +65,12 @@ class Edit_table(QtWidgets.QTableWidget):
         self.disabled = True
 
         # Zet het aantal rijen dat getekend moet worden op de lengte van de data met daarbij een 1 opgeteld.
+        # Controleer of er geen nieuwe rij gemaakt dient te worden.
         if self.no_new:
+            # Maak genoeg lege rijen aan voor alle data
             self.setRowCount(len(self.data))
         else:
+            # Maak genoeg lege rijen aan voor alle data + 1 extra rij. Vul de primairesleutel kolom met een '*' ( om aan te geven dat deze nog niet aangemaakt is)
             self.setRowCount(len(self.data) + 1)
             self.data.append({name: '*' if self.columns[name] !=
                               'editable' else None for name in self.columnnames})
@@ -149,15 +152,8 @@ class Edit_table(QtWidgets.QTableWidget):
 
                 if item.column() == 0:
                     # Check de starttijd.
-                    if check_time(str(item_row_data['starttijd'])):
+                    if check_time(item_row_data['starttijd']) != True:
                         error("Incorrecte invoer", "De starttijd is niet correct ingevoerd", "Controleert u alstublieft of de starttijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 09:22:23.")
-                        item.setText("")
-
-                # Controleer of de gewijzigde waarde afkomstig is uit de "eindtijd"-kolom.
-                if item.column() == 1:
-                    # Check de eindtijd.
-                    if check_time(str(item_row_data['eindtijd'])):
-                        error("Incorrecte invoer", "De eindtijd is niet correct ingevoerd", "Controleert u alstublieft of de eindtijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 17:22:23.")
                         item.setText("")
 
             # Indien de huidige rij ook de laatste rij is.
@@ -189,12 +185,13 @@ class Edit_table(QtWidgets.QTableWidget):
                         if change['data'][self.tablename + '_id'] == item_row_data[self.tablename + '_id']:
                             change['data'] = item_row_data
                             break
-                    else:
-                        # Voeg aan het changelog een nieuwe entry toe.
-                        self.changelog.append(
+                        else:
+                            # Voeg aan het changelog een nieuwe entry toe.
+                            self.changelog.append(
                             {'type': 'verandering', 'table': self.tablename, 'data': item_row_data})
 
             # Laat andere functies weer gebruik maken van de tabel.
+            print(self.changelog)
             self.disabled = False
 
     def delete_row(self):
@@ -238,6 +235,7 @@ class Edit_table(QtWidgets.QTableWidget):
             self.disabled = False
 
     def messagebox(self):
+        # Toont een dialoog waarmee gebruikers kunnen bevestigen of ze wel degelijk hun wijzigingen willen doorvoeren.
         msgbox = QtWidgets.QMessageBox()
         msgbox.setIcon(QtWidgets.QMessageBox.Warning)
         msgbox.setText("Weet u zeker dat u deze wijzigingen wilt doorvoeren?")
@@ -248,6 +246,7 @@ class Edit_table(QtWidgets.QTableWidget):
             self.save()
 
     def save(self):
+        # Voert de wijzigingen door naar de database.
         wijzigingen_doorvoeren(self.changelog)
         self.load_data()
 
@@ -255,6 +254,7 @@ class Edit_table(QtWidgets.QTableWidget):
         self.build_table()
 
     def get_row_data(self, row):
+        # Haalt de waardes op van een rij, die te zien is in de tabel.
         # "items" word gevuld met de gegevens van de huidige rij.
         items = [self.item(row, i)
                  for i in range(self.columnCount())]
