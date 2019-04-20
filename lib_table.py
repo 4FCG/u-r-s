@@ -8,8 +8,7 @@ except ImportError:
 
 from lib_database import get_data
 from lib_database import wijzigingen_doorvoeren
-from lib_checkinput import check_date
-from lib_checkinput import check_time
+from lib_checkinput import check_date, check_time, check_input
 from lib_error import error
 
 # columns: {'columnname': locked/editable}
@@ -113,48 +112,9 @@ class Edit_table(QtWidgets.QTableWidget):
             self.disabled = True
 
             item_row_data = self.get_row_data(item.row())
+
             # Variabelen controle:
-
-            # Controleer of de huidige tabel de 'dag'-tabel is.
-            if self.tablename == "dag":
-
-                # Controleer of de gewijzigde waarde afkomstig is uit de "datum"-kolom.
-                if item.column() == 0:
-                    # Check de datum.
-                    if check_date(str(item_row_data['datum'])) != True:
-                        error("Incorrecte invoer", "De datum is niet correct ingevoerd", "Controleert u alstublieft of de datums zijn ingevoerd met dit formaat: JJJJ-MM-DD, bijvoorbeeld: 1998-10-10.")
-                        item.setText("")
-
-                # Controleer of de gewijzigde waarde afkomstig is uit de "thuisofkantoor"-kolom.
-                elif item.column() == 1:
-                    # Check thuis of kantoor
-                    if item_row_data['thuisofkantoor'] != '0' and item_row_data['thuisofkantoor'] != '1':
-                        error("Incorrecte invoer", "De 'thuis of kantoor'-keuze is niet correct ingevoerd", "Vult u hier alstublieft een 0 in als u thuis heeft gewerkt en een 1 als u op kantoor heeft gewerkt.")
-                        item.setText("")
-
-                # Controleer of de gewijzigde waarde afkomstig is uit de "starttijd"-kolom.
-                elif item.column() == 2:
-                    # Check de starttijd.
-                    if check_time(item_row_data['starttijd']) != True:
-                        error("Incorrecte invoer", "De starttijd is niet correct ingevoerd", "Controleert u alstublieft of de starttijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 09:22:23.")
-                        item.setText("")
-
-                # Controleer of de gewijzigde waarde afkomstig is uit de "eindtijd"-kolom.
-                elif item.column() == 3:
-                    # Check de eindtijd.
-                    if check_time(item_row_data['eindtijd']) != True:
-                        error("Incorrecte invoer", "De eindtijd is niet correct ingevoerd", "Controleert u alstublieft of de eindtijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 17:22:23.")
-                        item.setText("")
-
-            # Controleer of de huidige tabel de 'activiteit'-tabel is.
-            if self.tablename == "activiteit":
-                # Controleer of de gewijzigde waarde afkomstig is uit de "starttijd"-kolom.
-
-                if item.column() == 0:
-                    # Check de starttijd.
-                    if check_time(item_row_data['starttijd']) != True:
-                        error("Incorrecte invoer", "De starttijd is niet correct ingevoerd", "Controleert u alstublieft of de starttijden zijn ingevoerd met dit formaat: U:MM:SS, bijvoorbeeld: 09:22:23.")
-                        item.setText("")
+            check_input(self, item)
 
             # Indien de huidige rij ook de laatste rij is.
             if item.row() == self.rowCount() - 1 and not self.no_new:
@@ -188,7 +148,7 @@ class Edit_table(QtWidgets.QTableWidget):
                         else:
                             # Voeg aan het changelog een nieuwe entry toe.
                             self.changelog.append(
-                            {'type': 'verandering', 'table': self.tablename, 'data': item_row_data})
+                                {'type': 'verandering', 'table': self.tablename, 'data': item_row_data})
 
             # Laat andere functies weer gebruik maken van de tabel.
             print(self.changelog)
