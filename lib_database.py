@@ -25,7 +25,7 @@ except ImportError:
               "[!] Configuratiebestand mist: Het configuratie bestand 'config.py' is vereist voor dit programma. Er zal een nieuw configuratie bestand aangemaakt worden."))
     exit()
 
-# Probeer verbinding te maken met de MySQL-database.
+# Probeer verbinding te maken met de MySQL-database. Met behulp van de instellingen uit "config.py".
 try:
     database = mysql.connector.connect(
         host=config.mysql['host'],
