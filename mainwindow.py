@@ -15,6 +15,7 @@ except ImportError:
     exit()
 
 from lib_table import Edit_table
+from lib_database import csv
 
 
 class Popup(QtWidgets.QMainWindow):
@@ -114,6 +115,38 @@ class Medewerker_overzicht(Edit_table):
             self.newscreen.show()
 
 
+class Rapport_buttons(QtWidgets.QButtonGroup):
+    def __init__(self, tab):
+        super().__init__(tab)
+        self.setExclusive(True)
+
+        self.rapporten = {
+            'maandoverzicht': {
+                'ACTIVITEITEN': ['activiteiten_id', 'activiteitnaam'],
+                'MEDEWERKER': ['medewerker_id', 'uurtarief', 'voornaam', 'achternaam'],
+                'DAG': ['thuisofkantoor', 'dag_id', 'goedgekeurd', 'medewerker_id'],
+                'ACTIVITEIT': ['uren', 'werkdag_id', 'activiteiten_id']
+            },
+            'thuiswerktijd': {
+                'MEDEWERKER': ['medewerker_id'],
+                'DAG': ['thuisofkantoor', 'dag_id', 'goedgekeurd', 'medewerker_id'],
+                'ACTIVITEIT': ['uren', 'werkdag_id']
+            }
+        }
+
+        for index, rapport in enumerate(list(self.rapporten.keys())):
+            button = QtWidgets.QPushButton(tab)
+            button.setGeometry(QtCore.QRect(10 + (100 * index), 10, 90, 23))
+            button.setObjectName("pushButton")
+            button.setText(rapport)
+            self.addButton(button, index)
+
+        self.buttonClicked.connect(self.exporteer_rapport)
+
+    def exporteer_rapport(self, button):
+        csv(button.text(), self.rapporten[button.text()])
+
+
 class Ui_MainWindow(object):
     def __init__(self, inlogdata):
         super().__init__()
@@ -155,14 +188,6 @@ class Ui_MainWindow(object):
                 'voornaam': 'locked', 'achternaam': 'locked', 'functie_id': 'editable', 'manager_id': 'locked', 'weekslot': 'editable'}, self.inlogdata, specifier="WHERE manager_id =" + str(self.inlogdata['medewerker_id']) + ";", no_new=True)
             self.tableWidget3.setGeometry(QtCore.QRect(10, 10, 765, 300))
             self.tableWidget3.setObjectName("tableWidget3")
-            # # Rechten aanpassen
-            # self.tabWidget.addTab(self.tab, "")
-            # self.tabWidget.setTabText(self.tabWidget.indexOf(
-            #     self.tab), "Rechten")
-            # self.tableWidget = Edit_table(self.tab, 'rechten', {
-            #     'functie_id': 'editable', 'activiteiten_id': 'editable'}, self.inlogdata)
-            # self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
-            # self.tableWidget.setObjectName("tableWidget")
 
             # activiteiten aanpassen
             self.tabWidget.addTab(self.tab, "")
@@ -172,6 +197,15 @@ class Ui_MainWindow(object):
                                           'activiteitnaam': 'editable', 'omschrijving': 'editable'}, self.inlogdata)
             self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
             self.tableWidget.setObjectName("tableWidget")
+
+            # raport data generatie
+            self.tab_4 = QtWidgets.QWidget()
+            self.tab_4.setObjectName("tab_3")
+            self.tabWidget.addTab(self.tab_4, "")
+            self.tabWidget.setTabText(self.tabWidget.indexOf(
+                self.tab_4), "Rapport data")
+
+            self.buttons = Rapport_buttons(self.tab_4)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)

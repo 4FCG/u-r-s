@@ -1,5 +1,6 @@
 from lib_log import log
 from lib_password import hash_password, verify_password
+from os import mkdir
 
 # Probeer om de "mysql.connector"-module te importeren.
 try:
@@ -14,7 +15,8 @@ try:
     import config
 except ImportError:
     # Plaats een melding in het logbestand en toon deze in de CLI.
-    print(log('CONFIGURATIE', "[!] Configuratiebestand mist: Het configuratie bestand 'config.py' is vereist voor dit programma. Er zal een nieuw configuratie bestand aangemaakt worden."))
+    print(log('CONFIGURATIE',
+              "[!] Configuratiebestand mist: Het configuratie bestand 'config.py' is vereist voor dit programma. Er zal een nieuw configuratie bestand aangemaakt worden."))
     exit()
 
 # Probeer verbinding te maken met de MySQL-database.
@@ -66,6 +68,7 @@ def login(voornaam, achternaam, wachtwoord):
     log('LOGIN', "Foutieve aanmelding voor: " + voornaam + " " + achternaam)
     return False
 
+
 def get_data(tablename, specifier):
     cursor.execute("SELECT * FROM " + tablename + " " +
                    ("" if specifier is None else specifier) + ";")
@@ -80,60 +83,88 @@ def get_data(tablename, specifier):
 
 def wijzigingen_doorvoeren(changelog):
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-        live = 1
-        for row in changelog:
-            tabel = str(row['table']).upper()
-            # De primaire sleutel zit altijd in een kolom met als naam de naam van de tabel met daarachter "_id".
-            primaire_sleutel = str(tabel.lower() + "_id")
-            if row['type'] == 'toevoeging':
-                row['data'].pop(primaire_sleutel, None)
-            kolommen = list(row['data'].keys())
-            waarden = list(row['data'].values())
+    live = 1
+    for row in changelog:
+        tabel = str(row['table']).upper()
+        # De primaire sleutel zit altijd in een kolom met als naam de naam van de tabel met daarachter "_id".
+        primaire_sleutel = str(tabel.lower() + "_id")
+        if row['type'] == 'toevoeging':
+            row['data'].pop(primaire_sleutel, None)
+        kolommen = list(row['data'].keys())
+        waarden = list(row['data'].values())
 
-            if row['type'] == "verwijdering":
-                if live == 1:
-                    cursor.execute("DELETE FROM " + tabel + " WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";")
-                    log('OPSLAAN', "Rij " + row['data'][primaire_sleutel] + " is succesvol verwijderd uit tabel " + tabel)
+        if row['type'] == "verwijdering":
+            if live == 1:
+                cursor.execute("DELETE FROM " + tabel + " WHERE " +
+                               primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";")
+                log('OPSLAAN', "Rij " + row['data'][primaire_sleutel] +
+                    " is succesvol verwijderd uit tabel " + tabel)
 
-                    # Speciale uitzondering voor de "DAG" tabel: Wanneer een dag verwijderd word dient ook de activiteiten van deze tabel verwijderd te worden.
-                    if tabel == "DAG":
-                        cursor.execute("DELETE FROM ACTIVITEITEN WHERE 'werkdag_id' " + " = " + row['data']['dag_id'] + ";")
-                        log('OPSLAAN', "[-] Rij " + row['data']['dag_id'] + " is succesvol verwijderd uit tabel ACTIVITEITEN.")
-                    database.commit()
+                # Speciale uitzondering voor de "DAG" tabel: Wanneer een dag verwijderd word dient ook de activiteiten van deze tabel verwijderd te worden.
+                if tabel == "DAG":
+                    cursor.execute("DELETE FROM ACTIVITEITEN WHERE 'werkdag_id' " +
+                                   " = " + row['data']['dag_id'] + ";")
+                    log('OPSLAAN', "[-] Rij " + row['data']['dag_id'] +
+                        " is succesvol verwijderd uit tabel ACTIVITEITEN.")
+                database.commit()
 
-                else:
-                    print("Verwijderen!")
+            else:
+                print("Verwijderen!")
 
-            elif row['type'] == "toevoeging":
-                if live == 1:
-                    query = "INSERT INTO " + tabel + " ("
-                    for kolom in kolommen:
-                        query += "`" + kolom + "`, "
-                    query = query[:-2]
-                    query += ") VALUES ("
-                    for waarde in waarden:
-                        query += "'" + waarde + "', "
-                    query = query[:-2]
-                    query += ");"
-                    cursor.execute(query)
-                    log('OPSLAAN', "[+] Rij " + str(cursor.lastrowid) + " is succesvol toegevoegd aan tabel " + tabel)
-                    database.commit()
+        elif row['type'] == "toevoeging":
+            if live == 1:
+                query = "INSERT INTO " + tabel + " ("
+                for kolom in kolommen:
+                    query += "`" + kolom + "`, "
+                query = query[:-2]
+                query += ") VALUES ("
+                for waarde in waarden:
+                    query += "'" + waarde + "', "
+                query = query[:-2]
+                query += ");"
+                cursor.execute(query)
+                log('OPSLAAN', "[+] Rij " + str(cursor.lastrowid) +
+                    " is succesvol toegevoegd aan tabel " + tabel)
+                database.commit()
 
-                else:
-                    print("Toevoegen!")
+            else:
+                print("Toevoegen!")
 
-            elif row['type'] == "verandering":
-                if live == 1:
-                    query = "UPDATE " + tabel + " SET "
+        elif row['type'] == "verandering":
+            if live == 1:
+                query = "UPDATE " + tabel + " SET "
 
-                    huidige_waarde = 0
-                    for kolom in kolommen:
-                        query += kolom + " = '" + waarden[huidige_waarde] + "', "
-                        huidige_waarde += 1
-                    query = query[:-2]
-                    query += " WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";"
-                    cursor.execute(query)
-                    log('OPSLAAN', "[|] Rij " + str(cursor.lastrowid) + " is succesvol aangepast in tabel " + tabel)
-                    database.commit()
-                else:
-                    print("Bijwerken!")
+                huidige_waarde = 0
+                for kolom in kolommen:
+                    query += kolom + " = '" + waarden[huidige_waarde] + "', "
+                    huidige_waarde += 1
+                query = query[:-2]
+                query += " WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";"
+                cursor.execute(query)
+                log('OPSLAAN', "[|] Rij " + str(cursor.lastrowid) +
+                    " is succesvol aangepast in tabel " + tabel)
+                database.commit()
+            else:
+                print("Bijwerken!")
+
+
+def csv(rapport, tabellen):
+    try:
+        mkdir('rapporten')
+    except FileExistsError:
+        pass
+    try:
+        mkdir('rapporten/' + rapport)
+    except FileExistsError:
+        pass
+
+    for tabel in list(tabellen.keys()):
+        columns = tabellen[tabel]
+        query = "SELECT " + ', '.join(columns) + ' FROM ' + tabel + ";"
+        cursor.execute(query)
+        rows = list(cursor)
+        with open('rapporten/' + rapport + '/' + tabel + '.txt', 'w') as file:
+            file.write(';'.join(['"' + column + '"' for column in columns]) + '\n')
+            for row in rows:
+                file.write(';'.join(['"' + value + '"' if isinstance(value, str)
+                                     else str(value) for value in row]) + '\n')
