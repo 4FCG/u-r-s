@@ -1,6 +1,11 @@
+# Interne python module om logs op te slaan.
 from lib_log import log
+
+# Interne python module om wachtwoorde te hashen.
 from lib_password import hash_password, verify_password
 from os import mkdir, startfile, path
+
+# Interne python module om foutmeldingen te tonen.
 from lib_error import error
 
 # Probeer om de "mysql.connector"-module te importeren.
@@ -57,35 +62,73 @@ def add_user(voornaam, achternaam, wachtwoord, functie_id, type_medewerker, mag_
 
 
 def login(voornaam, achternaam, wachtwoord):
+    # Controleerd of de inloggegevens correct zijn.
+
+    # Voer een query uit om uit te zoeken of de opgegeven voornaam en achternaam bestaan in de database.
     cursor.execute(
         "SELECT * FROM MEDEWERKER WHERE voornaam = %s AND achternaam = %s;", (voornaam, achternaam))
+
+    # Sla de resultaten op in "values".
     values = list(cursor)
+
+    # Haal de kolommen op uit tabel MEDEWERKER.
     cursor.execute("SHOW columns FROM MEDEWERKER;")
+
+    # S;a de resultaten van de vorige query op in ""columns".
     columns = list(cursor)
+
+    # Voor iedere rij in "values".
     for row in values:
+        # Controleer of de hash van het ingevoerde wachtwoord overeenkomt met de hash in de database van een van de gebruikers.
         if verify_password(row[3], wachtwoord):
+            # Indien het lukt sla in het log op dat het gelukt is.
             log('LOGIN', "Succesvolle aanmelding voor: " + voornaam + " " + achternaam)
+
+            # Geef de informatie van de ingelogde gebruiker door.
             return {columns[index][0]: value for index, value in enumerate(row)}
+
+    # Sla op in het log dat het inloggen is mislukt.
     log('LOGIN', "Foutieve aanmelding voor: " + voornaam + " " + achternaam)
+
+    # Indien er geen resultaten gevonden zijn return False.
     return False
 
 
 def get_data(tablename, specifier):
+    # Verkrijg gemakkelijk data uit de database.
+
+    # Voer een SELECT-query uit op "tablename" met als verdere argumenten "specifier".
     cursor.execute("SELECT * FROM " + tablename + " " +
                    ("" if specifier is None else specifier) + ";")
+
+    # Sla de opgehaalde gegevens op in "values".
     values = list(cursor)
+
+    # Verkrijg alle kolommen uit de table.
     cursor.execute("SHOW columns FROM " + tablename + ";")
+
+    # Sla de verkregen kolommen op in "columns".
     columns = list(cursor)
+
+    # Maak een nieuwe list aan genaamd "data".
     data = []
+
+    # Voor iedere rij in "values".
     for row in values:
+
+        # Voeg een nieuwe rij toe in "data" met de waardes uit "values".
         data.append({column[0]: row[index] for index, column in enumerate(columns)})
+
+    # Geef terug "data".
     return data
 
 
 def wijzigingen_doorvoeren(changelog):
+    # Deze functie wordt pas uitgevoerd wanneer de gebruiker op "Opslaan" klikt.
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
     if changelog != []:
         live = 1
+        # Voor iedere "row" (iedere keer wanneer de visuele tabel wordt aangepast wordt  de verandering opgeslagen in "changelog").
         for row in changelog:
             tabel = str(row['table']).upper()
             # De primaire sleutel zit altijd in een kolom met als naam de naam van de tabel met daarachter "_id".
@@ -96,6 +139,7 @@ def wijzigingen_doorvoeren(changelog):
             waarden = list(row['data'].values())
 
             if row['type'] == "verwijdering":
+                # Is handig voor het testen. Zo kunnen we de interne programmatuur van het programma testen zonder perongeluk onze database aan te passen.
                 if live == 1:
                     cursor.execute("DELETE FROM " + tabel + " WHERE " +
                                    primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";")
@@ -114,7 +158,11 @@ def wijzigingen_doorvoeren(changelog):
                     print("Verwijderen!")
 
             elif row['type'] == "toevoeging":
+                # Is handig voor het testen. Zo kunnen we de interne programmatuur van het programma testen zonder perongeluk onze database aan te passen.
                 if live == 1:
+
+                    # De volgende code bouwt een INSTERT-INTO-query, de onderstaande regelscode doen niks meer dan het normaliseren van de query.
+                    # Het zorgt ongeacht de grootte, het aantal rijen en waarden altijd een juiste INSERT-INTO-query.
                     query = "INSERT INTO " + tabel + " ("
                     for kolom in kolommen:
                         query += "`" + kolom + "`, "
@@ -133,7 +181,11 @@ def wijzigingen_doorvoeren(changelog):
                     print("Toevoegen!")
 
             elif row['type'] == "verandering":
+                # Is handig voor het testen. Zo kunnen we de interne programmatuur van het programma testen zonder perongeluk onze database aan te passen.
                 if live == 1:
+
+                    # De volgende code bouwt een UPDATE-query, de onderstaande regelscode doen niks meer dan het normaliseren van de query.
+                    # Het zorgt ongeacht de grootte, het aantal rijen en waarden altijd een juiste UPDATE-query.
                     query = "UPDATE " + tabel + " SET "
 
                     huidige_waarde = 0
@@ -155,14 +207,19 @@ def wijzigingen_doorvoeren(changelog):
 
 def csv(rapport, tabellen):
     try:
+        # Probeer een folder aan te maken voor de rapporten.
         mkdir('rapporten')
     except FileExistsError:
+        # Indien de folder al bestaat ga verder.
         pass
     try:
+        # Probeer een bestand aan te maken voor het rapport.
         mkdir('rapporten/' + rapport)
     except FileExistsError:
+        # Indien deze al bestaat ga verder.
         pass
 
+    # Voor iedere key in de dictionary "tabellen".
     for tabel in list(tabellen.keys()):
         columns = tabellen[tabel]
         query = "SELECT " + ', '.join(columns) + ' FROM ' + tabel + ";"
