@@ -83,69 +83,73 @@ def get_data(tablename, specifier):
 
 def wijzigingen_doorvoeren(changelog):
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-    live = 1
-    for row in changelog:
-        tabel = str(row['table']).upper()
-        # De primaire sleutel zit altijd in een kolom met als naam de naam van de tabel met daarachter "_id".
-        primaire_sleutel = str(tabel.lower() + "_id")
-        if row['type'] == 'toevoeging':
-            row['data'].pop(primaire_sleutel, None)
-        kolommen = list(row['data'].keys())
-        waarden = list(row['data'].values())
+    if changelog != []:
+        live = 1
+        for row in changelog:
+            tabel = str(row['table']).upper()
+            # De primaire sleutel zit altijd in een kolom met als naam de naam van de tabel met daarachter "_id".
+            primaire_sleutel = str(tabel.lower() + "_id")
+            if row['type'] == 'toevoeging':
+                row['data'].pop(primaire_sleutel, None)
+            kolommen = list(row['data'].keys())
+            waarden = list(row['data'].values())
 
-        if row['type'] == "verwijdering":
-            if live == 1:
-                cursor.execute("DELETE FROM " + tabel + " WHERE " +
-                               primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";")
-                log('OPSLAAN', "Rij " + row['data'][primaire_sleutel] +
-                    " is succesvol verwijderd uit tabel " + tabel)
+            if row['type'] == "verwijdering":
+                if live == 1:
+                    cursor.execute("DELETE FROM " + tabel + " WHERE " +
+                                   primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";")
+                    log('OPSLAAN', "Rij " + row['data'][primaire_sleutel] +
+                        " is succesvol verwijderd uit tabel " + tabel)
 
-                # Speciale uitzondering voor de "DAG" tabel: Wanneer een dag verwijderd word dient ook de activiteiten van deze tabel verwijderd te worden.
-                if tabel == "DAG":
-                    cursor.execute("DELETE FROM ACTIVITEITEN WHERE 'werkdag_id' " +
-                                   " = " + row['data']['dag_id'] + ";")
-                    log('OPSLAAN', "[-] Rij " + row['data']['dag_id'] +
-                        " is succesvol verwijderd uit tabel ACTIVITEITEN.")
-                database.commit()
+                    # Speciale uitzondering voor de "DAG" tabel: Wanneer een dag verwijderd word dient ook de activiteiten van deze tabel verwijderd te worden.
+                    if tabel == "DAG":
+                        cursor.execute("DELETE FROM ACTIVITEITEN WHERE 'werkdag_id' " +
+                                       " = " + row['data']['dag_id'] + ";")
+                        log('OPSLAAN', "[-] Rij " + row['data']['dag_id'] +
+                            " is succesvol verwijderd uit tabel ACTIVITEITEN.")
+                    database.commit()
 
-            else:
-                print("Verwijderen!")
+                else:
+                    print("Verwijderen!")
 
-        elif row['type'] == "toevoeging":
-            if live == 1:
-                query = "INSERT INTO " + tabel + " ("
-                for kolom in kolommen:
-                    query += "`" + kolom + "`, "
-                query = query[:-2]
-                query += ") VALUES ("
-                for waarde in waarden:
-                    query += "'" + waarde + "', "
-                query = query[:-2]
-                query += ");"
-                cursor.execute(query)
-                log('OPSLAAN', "[+] Rij " + str(cursor.lastrowid) +
-                    " is succesvol toegevoegd aan tabel " + tabel)
-                database.commit()
+            elif row['type'] == "toevoeging":
+                if live == 1:
+                    query = "INSERT INTO " + tabel + " ("
+                    for kolom in kolommen:
+                        query += "`" + kolom + "`, "
+                    query = query[:-2]
+                    query += ") VALUES ("
+                    for waarde in waarden:
+                        query += "'" + waarde + "', "
+                    query = query[:-2]
+                    query += ");"
+                    cursor.execute(query)
+                    log('OPSLAAN', "[+] Rij " + str(cursor.lastrowid) +
+                        " is succesvol toegevoegd aan tabel " + tabel)
+                    database.commit()
 
-            else:
-                print("Toevoegen!")
+                else:
+                    print("Toevoegen!")
 
-        elif row['type'] == "verandering":
-            if live == 1:
-                query = "UPDATE " + tabel + " SET "
+            elif row['type'] == "verandering":
+                if live == 1:
+                    query = "UPDATE " + tabel + " SET "
 
-                huidige_waarde = 0
-                for kolom in kolommen:
-                    query += kolom + " = '" + waarden[huidige_waarde] + "', "
-                    huidige_waarde += 1
-                query = query[:-2]
-                query += " WHERE " + primaire_sleutel + " = " + row['data'][primaire_sleutel] + ";"
-                cursor.execute(query)
-                log('OPSLAAN', "[|] Rij " + str(cursor.lastrowid) +
-                    " is succesvol aangepast in tabel " + tabel)
-                database.commit()
-            else:
-                print("Bijwerken!")
+                    huidige_waarde = 0
+                    for kolom in kolommen:
+                        query += kolom + " = '" + waarden[huidige_waarde] + "', "
+                        huidige_waarde += 1
+                    query = query[:-2]
+                    query += " WHERE " + primaire_sleutel + \
+                        " = " + row['data'][primaire_sleutel] + ";"
+                    cursor.execute(query)
+                    log('OPSLAAN', "[|] Rij " + str(cursor.lastrowid) +
+                        " is succesvol aangepast in tabel " + tabel)
+                    database.commit()
+                else:
+                    print("Bijwerken!")
+
+        changelog.clear()
 
 
 def csv(rapport, tabellen):

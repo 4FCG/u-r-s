@@ -8,7 +8,7 @@ except ImportError:
 
 from lib_database import get_data
 from lib_database import wijzigingen_doorvoeren
-from lib_checkinput import check_date, check_time, check_input
+from lib_checkinput import check_input
 from lib_error import error
 
 # columns: {'columnname': locked/editable}
@@ -114,10 +114,11 @@ class Edit_table(QtWidgets.QTableWidget):
             item_row_data = self.get_row_data(item.row())
 
             # Variabelen controle:
-            check_input(self, item)
+            check_input(self, item, self.user)
 
             # Indien de huidige rij ook de laatste rij is.
             if item.row() == self.rowCount() - 1 and not self.no_new:
+                self.itemChanged.connect(self.new_data)
                 # Indien de rij niet leeg is.
                 if '' not in item_row_data.values():
                     # Voeg in een nieuwe rij van "data" de gegevens van "item_row_data".
@@ -129,6 +130,7 @@ class Edit_table(QtWidgets.QTableWidget):
                     # Vul de tabel met de gegevens.
                     self.build_table()
             else:
+                print("else")
 
                 if item_row_data[self.tablename + '_id'] == '*':
 
@@ -141,14 +143,16 @@ class Edit_table(QtWidgets.QTableWidget):
                             # Stel je voor je zoekt een telefoonnummer in een telefoonboek. En je hebt het zojuist gevonden. Blijf je dan doorzoeken?
                             break
                 else:
+                    print("else 2")
                     for change in self.changelog:
                         if change['data'][self.tablename + '_id'] == item_row_data[self.tablename + '_id']:
                             change['data'] = item_row_data
                             break
-                        else:
-                            # Voeg aan het changelog een nieuwe entry toe.
-                            self.changelog.append(
-                                {'type': 'verandering', 'table': self.tablename, 'data': item_row_data})
+                    else:
+                        print("else 3")
+                        # Voeg aan het changelog een nieuwe entry toe.
+                        self.changelog.append(
+                        {'type': 'verandering', 'table': self.tablename, 'data': item_row_data})
 
             # Laat andere functies weer gebruik maken van de tabel.
             print(self.changelog)
