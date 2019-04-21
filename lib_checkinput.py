@@ -82,10 +82,8 @@ def is_allowed(date, starttime):
     return dt > last_monday
 
 
-def check_input(table, item, user):
+def check_input(table, item):
     name = table.horizontalHeaderItem(item.column()).text()
-    print(name)
-
     if name == 'datum':
         if not check_date(item.text()):
             error("Incorrecte invoer", "De datum is niet correct ingevoerd",
@@ -132,9 +130,7 @@ def check_input(table, item, user):
 
     elif name == 'activiteiten_id':
         activiteiten_tekst = ""
-        activiteiten_toegestaan = get_data('RECHTEN', 'WHERE functie_id = ' + str(user['functie_id']))
-        print(activiteiten_toegestaan[0].values())
-        print(item.text())
+        activiteiten_toegestaan = get_data('RECHTEN', 'WHERE functie_id = ' + str(table.user['functie_id']))
 
         if not int(item.text()) in activiteiten_toegestaan[0].values():
             for rij in get_data("ACTIVITEITEN", ""):
