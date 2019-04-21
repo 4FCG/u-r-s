@@ -15,7 +15,7 @@ except ImportError:
     exit()
 
 from lib_table import Edit_table
-from lib_database import csv
+from widget_rapport import Rapport_buttons
 
 
 class Popup(QtWidgets.QMainWindow):
@@ -33,42 +33,6 @@ class Popup(QtWidgets.QMainWindow):
                                       'starttijd': 'editable', 'uren': 'editable', 'activiteiten_id': 'editable', 'opmerking': 'editable', 'werkdag_id': werkdag_id}, user, specifier="WHERE werkdag_id =" + werkdag_id + ";", no_new=self.no_new)
         self.tableWidget.setGeometry(QtCore.QRect(10, 10, 765, 300))
         self.tableWidget.setObjectName("tableWidget")
-
-    # def save(self):
-    # # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
-    #
-    #     # Toon de wijzigingen.
-    #     print(self.user, self.changelog)
-    #
-    #     live = 1
-    #
-    #     for row in self.changelog:
-    #         print(row)
-    #         if (row['data']['dag_id'] != "*") and (row['type'] == "verwijdering"):
-    #             if live == 1:
-    #                 rij_verwijder("ACTIVITEIT", "activiteit_id", row['data']['activiteit_id'])
-    #
-    #             else:
-    #                 print("Verwijderen!")
-    #
-    #         elif row['type'] == "toevoeging":
-    #             if live == 1:
-    #                 rij_toevoegen("ACTIVITEIT", ("werkdag_id", "starttijd", "uren", "activiteiten_id", "opmerking"), (row['data']['werkdag_id'], row['data']['starttijd'], row['data']['uren'], row['data']['activiteiten_id'], row['data']['opmerking']))
-    #             else:
-    #                 print("Toevoegen!")
-    #
-    #         elif row['type'] == "verandering":
-    #             if live == 1:
-    #                 rij_bijwerken("ACTIVITEIT", ("werkdag_id", "starttijd", "uren", "activiteiten_id", "opmerking"), (row['data']['werkdag_id'], row['data']['starttijd'], row['data']['uren'], row['data']['activiteiten_id'], row['data']['opmerking']))
-    #             else:
-    #                 print("Bijwerken!")
-    #
-    #     # Roep de "load_data()" functie aan om nieuwe gegevens uit de database te halen.
-    #     self.tableWidget.load_data()
-    #
-    #
-    #     # Roep de "build_table()" functie aan om de tabel te vullen met de opgehaalde gegevens.
-    #     self.tableWidget.build_table()
 
 
 class Werkdag(Edit_table):
@@ -113,38 +77,6 @@ class Medewerker_overzicht(Edit_table):
         if item_row_data['medewerker_id'] != '*':
             self.newscreen = Werkdagen_popup(item_row_data['medewerker_id'], self.inlogdata)
             self.newscreen.show()
-
-
-class Rapport_buttons(QtWidgets.QButtonGroup):
-    def __init__(self, tab):
-        super().__init__(tab)
-        self.setExclusive(True)
-
-        self.rapporten = {
-            'maandoverzicht': {
-                'ACTIVITEITEN': ['activiteiten_id', 'activiteitnaam'],
-                'MEDEWERKER': ['medewerker_id', 'uurtarief', 'voornaam', 'achternaam'],
-                'DAG': ['thuisofkantoor', 'dag_id', 'goedgekeurd', 'medewerker_id'],
-                'ACTIVITEIT': ['uren', 'werkdag_id', 'activiteiten_id']
-            },
-            'thuiswerktijd': {
-                'MEDEWERKER': ['medewerker_id'],
-                'DAG': ['thuisofkantoor', 'dag_id', 'goedgekeurd', 'medewerker_id'],
-                'ACTIVITEIT': ['uren', 'werkdag_id']
-            }
-        }
-
-        for index, rapport in enumerate(list(self.rapporten.keys())):
-            button = QtWidgets.QPushButton(tab)
-            button.setGeometry(QtCore.QRect(10 + (100 * index), 10, 90, 23))
-            button.setObjectName("pushButton")
-            button.setText(rapport)
-            self.addButton(button, index)
-
-        self.buttonClicked.connect(self.exporteer_rapport)
-
-    def exporteer_rapport(self, button):
-        csv(button.text(), self.rapporten[button.text()])
 
 
 class Ui_MainWindow(object):

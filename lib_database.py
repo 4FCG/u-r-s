@@ -1,6 +1,7 @@
 from lib_log import log
 from lib_password import hash_password, verify_password
-from os import mkdir
+from os import mkdir, startfile, path
+from lib_error import error
 
 # Probeer om de "mysql.connector"-module te importeren.
 try:
@@ -172,3 +173,7 @@ def csv(rapport, tabellen):
             for row in rows:
                 file.write(';'.join(['"' + value + '"' if isinstance(value, str)
                                      else str(value) for value in row]) + '\n')
+    try:
+        startfile(path.realpath('rapporten/' + rapport))
+    except:
+        error("Rapport gegenereerd", 'Het gevraagde rapport is te vinden in:', 'rapporten/' + rapport)
