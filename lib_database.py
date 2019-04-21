@@ -66,6 +66,7 @@ def login(voornaam, achternaam, wachtwoord):
     log('LOGIN', "Foutieve aanmelding voor: " + voornaam + " " + achternaam)
     return False
 
+
 def get_data(tablename, specifier):
     cursor.execute("SELECT * FROM " + tablename + " " +
                    ("" if specifier is None else specifier) + ";")
@@ -80,6 +81,7 @@ def get_data(tablename, specifier):
 
 def wijzigingen_doorvoeren(changelog):
     # Slaat de ingevoerde gegevens op in de database. En werkt de tabel bij.
+    if changelog != []:
         live = 1
         for row in changelog:
             tabel = str(row['table']).upper()
@@ -137,3 +139,5 @@ def wijzigingen_doorvoeren(changelog):
                     database.commit()
                 else:
                     print("Bijwerken!")
+
+        changelog.clear()
