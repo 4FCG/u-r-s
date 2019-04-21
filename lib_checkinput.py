@@ -84,7 +84,7 @@ def is_allowed(date, starttime):
 
 def check_input(table, item, user):
     name = table.horizontalHeaderItem(item.column()).text()
-
+    print(name)
 
     if name == 'datum':
         if not check_date(item.text()):
@@ -114,7 +114,7 @@ def check_input(table, item, user):
                   "Vult u hier alstublieft een 0 in als de activiteit niet goedkeurd en een 1 als u het wel goedkeurd.")
             item.setText("")
 
-    elif name == 'uren' or name == 'activiteiten_id':
+    elif name == 'uren':
         if not check_illegalcharacters_number(item.text()):
             error("Incorrecte invoer", "De '" + name + "'-keuze is niet correct ingevoerd",
                   "Vult u hier alstublieft alleen cijfers in.")
