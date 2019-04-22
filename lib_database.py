@@ -25,6 +25,11 @@ except ImportError:
               "[!] Configuratiebestand mist: Het configuratie bestand 'config.py' is vereist voor dit programma. Er zal een nieuw configuratie bestand aangemaakt worden."))
     exit()
 
+if config.mysql['passwd'] == "":
+    print(log('CONFIGURATIE',
+              "[!] Configuratiebestand mist: Is nog niet volledig ingevuld. Past u deze alstublieft aan."))
+    exit()
+
 # Probeer verbinding te maken met de MySQL-database. Met behulp van de instellingen uit "config.py".
 try:
     database = mysql.connector.connect(
