@@ -111,9 +111,10 @@ class Edit_table(QtWidgets.QTableWidget):
         if not self.disabled:
             # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
             self.disabled = True
-            item_row_data = self.get_row_data(item.row())
             # Variabelen controle:
             check_input(self, item)
+            # data van de rij ophalen
+            item_row_data = self.get_row_data(item.row())
 
             # Indien de huidige rij ook de laatste rij is.
             if item.row() == self.rowCount() - 1 and not self.no_new:
