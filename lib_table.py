@@ -216,5 +216,4 @@ class Edit_table(QtWidgets.QTableWidget):
         items = [self.item(row, i)
                  for i in range(self.columnCount())]
         # De waardes uit items worden gekoppeld aan hun kolomnaam als sleutelwaarde
-        return {self.columnnames[item.column(
-        )]: None if item is None else item.text() for item in items}
+        return {self.columnnames[item.column()]: None if item is None else item.text() for item in items}
