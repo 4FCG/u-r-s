@@ -1,9 +1,9 @@
+config.py
 rapporten/
 .idea/
 log/log.txt
 *.xml
 *.iml
-config.py
 convert.bat
 # Byte-compiled / optimized / DLL files
 __pycache__/
