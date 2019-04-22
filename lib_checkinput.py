@@ -131,12 +131,18 @@ def check_input(table, item):
     elif name == 'activiteiten_id':
         activiteiten_tekst = ""
         activiteiten_toegestaan = get_data('RECHTEN', 'WHERE functie_id = ' + str(table.user['functie_id']))
+        print(activiteiten_toegestaan)
+        activiteiten_toegestaan_list = [4, 11]
+        for value in activiteiten_toegestaan[0].values():
+            activiteiten_toegestaan_list.append(value)
+        print(activiteiten_toegestaan_list)
 
-        if not int(item.text()) in activiteiten_toegestaan[0].values():
+        if not int(item.text()) in activiteiten_toegestaan_list:
+            print(item.text())
             for rij in get_data("ACTIVITEITEN", ""):
-                if rij['activiteiten_id'] in activiteiten_toegestaan[0].values():
+                if rij['activiteiten_id'] in activiteiten_toegestaan[0].values() or rij['activiteiten_id'] == 4 or rij['activiteiten_id'] == 11:
                     activiteiten_tekst += "\n- " + str(rij['activiteiten_id']) + ": " + rij['activiteitnaam'] + ": " + \
-                                          rij['omschrijving']
+                                      rij['omschrijving']
             error("Incorrecte invoer", "Deze activiteit bestaat niet",
                   "Plaatst u alstublieft een van de volgende activiteiten:\n " + activiteiten_tekst)
             item.setText("")
