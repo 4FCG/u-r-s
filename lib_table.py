@@ -80,7 +80,8 @@ class Edit_table(QtWidgets.QTableWidget):
             for item_index, name in enumerate(self.columnnames):
 
                 # "item" word gevuld met
-                item = QtWidgets.QTableWidgetItem(str(row[name]) if row[name] is not None else None)
+                item = QtWidgets.QTableWidgetItem(
+                    str(row[name])) if row[name] is not None else QtWidgets.QTableWidgetItem('')
 
                 # Controleer of de huidige kolom staat aangegeven als "locked", indien waar sta niet toe dat gebruikers waardes invullen.
                 if self.columns[name] == 'locked':
@@ -110,15 +111,12 @@ class Edit_table(QtWidgets.QTableWidget):
         if not self.disabled:
             # Zorgt er voor dat er tijdens het ophalen van data geen nieuwe data kan worden toegevoegd vanuit een andere functie.
             self.disabled = True
-
             item_row_data = self.get_row_data(item.row())
-
             # Variabelen controle:
             check_input(self, item)
 
             # Indien de huidige rij ook de laatste rij is.
             if item.row() == self.rowCount() - 1 and not self.no_new:
-                self.itemChanged.connect(self.new_data)
                 # Indien de rij niet leeg is.
                 if '' not in item_row_data.values():
                     # Voeg in een nieuwe rij van "data" de gegevens van "item_row_data".
@@ -148,7 +146,7 @@ class Edit_table(QtWidgets.QTableWidget):
                     else:
                         # Voeg aan het changelog een nieuwe entry toe.
                         self.changelog.append(
-                        {'type': 'verandering', 'table': self.tablename, 'data': item_row_data})
+                            {'type': 'verandering', 'table': self.tablename, 'data': item_row_data})
 
             # Laat andere functies weer gebruik maken van de tabel.
             self.disabled = False
