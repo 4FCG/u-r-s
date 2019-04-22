@@ -1,8 +1,8 @@
 mysql = {
-    'host': "urs.heijmann.com",
-    'user': "admin",
-    'passwd': "6VMqBu3E",
-    'database': "casus"
+    'host': "",
+    'user': "",
+    'passwd': "",
+    'database': ""
 }
 log = {
     'path': "log/"
